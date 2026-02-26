@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\api\AttendanceController;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\FridayScheduleController;
 use App\Http\Controllers\api\SchoolClassController;
@@ -42,4 +43,13 @@ Route::group(['prefix' => 'schedule'], function () {
     Route::get('/{id}', [FridayScheduleController::class, 'show']);
     Route::put('/{id}', [FridayScheduleController::class, 'update']);
     Route::delete('/{id}', [FridayScheduleController::class, 'destroy']);
+});
+
+//attendance
+Route::group(['prefix' => 'attendance'], function () {
+    Route::get('/', [AttendanceController::class, 'index']);
+    Route::post('/', [AttendanceController::class, 'store']);
+    Route::get('/{id}', [AttendanceController::class, 'show']);
+    Route::put('/{id}', [AttendanceController::class, 'update']);
+    // Route::delete('/{id}', [AttendanceController::class, 'destroy']);
 });
