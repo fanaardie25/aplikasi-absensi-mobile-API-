@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AuthController;
+use App\Http\Controllers\api\FridayScheduleController;
 use App\Http\Controllers\api\SchoolClassController;
 use App\Http\Controllers\api\UserController;
 use Illuminate\Http\Request;
@@ -32,4 +33,13 @@ Route::group(['prefix' => 'class'], function () {
     Route::get('/{id}', [SchoolClassController::class, 'show']);
     Route::put('/{id}', [SchoolClassController::class, 'update']);
     Route::delete('/{id}', [SchoolClassController::class, 'destroy']);
+});
+
+//schedule
+Route::group(['prefix' => 'schedule'], function () {
+    Route::get('/', [FridayScheduleController::class, 'index']);
+    Route::post('/', [FridayScheduleController::class, 'store']);
+    Route::get('/{id}', [FridayScheduleController::class, 'show']);
+    Route::put('/{id}', [FridayScheduleController::class, 'update']);
+    Route::delete('/{id}', [FridayScheduleController::class, 'destroy']);
 });
