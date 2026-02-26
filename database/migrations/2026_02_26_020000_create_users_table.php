@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['admin', 'student'])->default('student');
+            $table->string('nis')->unique()->nullable();
+            $table->foreignId('class_id')->nullable()->constrained('school_classes')->nullOnDelete('cascade');
+            $table->string('profile_photo_path', 2048)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
