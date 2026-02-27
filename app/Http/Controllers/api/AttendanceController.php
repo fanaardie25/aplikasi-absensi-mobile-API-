@@ -18,7 +18,7 @@ class AttendanceController extends Controller implements HasMiddleware
     {
         return [
             'auth:sanctum',
-            new Middleware('role:admin', except: ['index', 'show']),
+            new Middleware('role:admin', except: ['index', 'show','store']),
         ];
     }
 
@@ -49,7 +49,6 @@ class AttendanceController extends Controller implements HasMiddleware
         ]);
 
     }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -70,7 +69,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if (!$rolling) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kelas kamu tidak terdaftar untuk sholat jumat di sekolah hari ini.'
+                'message' => 'Your class is not registered for Friday prayer at school today.'
             ], 403);
         }
 
@@ -82,7 +81,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($alreadyAttended) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kamu sudah melakukan absensi hari ini.'
+                'message' => 'You have already checked in today.'
             ], 422);
         }
 
@@ -96,7 +95,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($distance > $radius) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kamu berada di luar radius sekolah. Jarak: ' . round($distance) . 'm.'
+                'message' => 'You are outside the school radius. Distance: ' . round($distance) . 'm.'
             ], 403);
         }
 
@@ -117,7 +116,7 @@ class AttendanceController extends Controller implements HasMiddleware
 
         return response()->json([
             'success' => true,
-            'message' => 'Absensi berhasil! Selamat beribadah.',
+            'message' => 'Attendance recorded successfully!',
             'data'    => $attendance
         ], 201);
     }
@@ -127,46 +126,20 @@ class AttendanceController extends Controller implements HasMiddleware
         if (! $attendance = Attendance::find($id)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Attendance not found',
+                'message' => 'Attendance data not found',
             ], 404);
         }
 
         $validated = $request->validate([
             'status'      => ['sometimes', 'in:hadir,tidak_hadir,izin,sakit'],
-            'latitude'    => ['sometimes', 'string'],
-            'longtitude'   => ['sometimes', 'string'],
-            'photo'       => ['sometimes', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'is_verified' => ['sometimes', 'boolean'],
         ]);
 
-        if (isset($validated['photo'])) {
-            $image = $validated['photo'];
-            $imageName = time() . '_' . $attendance->student_id . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('attendances', $imageName, 'public');
-            $validated['photo_path'] = Storage::url($path);
-            unset($validated['photo']);
-        }
-
-        $attendance->fill($validated);
-        $saved = $attendance->save();
-
-        if (! $saved) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to save attendance',
-            ], 500);
-        }
-
-        if (! $attendance->wasChanged()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No changes were made to the attendance record',
-            ], 422);
-        }
+        $attendance->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Attendance updated successfully',
+            'message' => 'Attendance status updated successfully',
             'data'    => $attendance,
         ]);
     }
