@@ -5,11 +5,55 @@ use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\FridayScheduleController;
 use App\Http\Controllers\api\SchoolClassController;
 use App\Http\Controllers\api\UserController;
+use App\Models\Attendance;
+use App\Models\ScheduleClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/me', function (Request $request) {
-    return $request->user();
+    $user = $request->user()->load('schoolClass');
+    
+    $todayDate = now()->format('Y-m-d');
+
+    $userSchedule = ScheduleClass::where('class_id',$user->schoolClass->id)
+                        ->whereDate('created_at', $todayDate)
+                        ->first();
+
+    $hasScheduleToday = $user->schoolClass->schedules()
+        ->where('date', $todayDate) 
+        ->exists();
+
+    $attendanceToday = Attendance::where('student_id', $user->id)
+        ->whereDate('created_at', $todayDate)
+        ->first();
+
+
+    return response()->json([
+        'id'                 => $user->id,
+        'name'               => $user->name,
+        'email'              => $user->email,
+        'role'               => $user->role, 
+        'nis'                => $user->nis,  
+        'class_id'           => $user->class_id,
+        'profile_photo_path' => $user->profile_photo_url ?? '',
+        'schedule_id'       =>  $userSchedule->schedule_id,
+        
+
+        'school_class'       => [
+            'id'       => $user->schoolClass->id,
+            'name'     => $user->schoolClass->name,
+            'grade'    => $user->schoolClass->grade,
+            'major'    => $user->schoolClass->major,
+            'sequence' => $user->schoolClass->sequence,
+        ],
+
+        'is_schedule_open'   => $hasScheduleToday,
+        'is_absent_today'    => !is_null($attendanceToday),
+        'stats' => [
+            'hadir'       => Attendance::where('student_id', $user->id)->count(),
+            'total_pekan' => 15
+        ]
+    ]);
 })->middleware('auth:sanctum');
 
 //auth

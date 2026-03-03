@@ -61,21 +61,24 @@ class AttendanceController extends Controller implements HasMiddleware
         $user = Auth::user();
     
         $rolling = DB::table('schedule_classes')
+            ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
             ->where('schedule_id', $request->schedule_id)
             ->where('class_id', $user->class_id)
+            ->where('school_classes.is_active', 1)
+            ->select('schedule_classes.*')
             ->first();
 
 
         if (!$rolling) {
             return response()->json([
                 'success' => false,
-                'message' => 'Your class is not registered for Friday prayer at school today.'
+                'message' => 'Kelas tidak terdaftar atau sudah tidak aktif.'
             ], 403);
         }
 
-        // 2. Cek apakah sudah absen menggunakan ID PIVOT
+  
         $alreadyAttended = Attendance::where('student_id', $user->id)
-            ->where('schedule_class_id', $rolling->id) // Pake ID dari pivot
+            ->where('schedule_class_id', $rolling->id)
             ->exists();
 
         if ($alreadyAttended) {
@@ -85,7 +88,7 @@ class AttendanceController extends Controller implements HasMiddleware
             ], 422);
         }
 
-        // --- LOGIC JARAK (Tetap Sama) ---
+    
         $schoolLat = -7.390085504631045;
         $schoolLong = 110.51753388175834;
         $radius = 50; 
@@ -99,15 +102,15 @@ class AttendanceController extends Controller implements HasMiddleware
             ], 403);
         }
 
-        // --- LOGIC SIMPAN FOTO ---
+     
         $image = $request->file('photo');
         $imageName = time() . '_' . $user->id . '.' . $image->getClientOriginalExtension();
         $path = $image->storeAs('attendances', $imageName, 'public');
 
-        // --- SIMPAN KE DATABASE ---
+       
         $attendance = Attendance::create([
             'student_id'        => $user->id,
-            'schedule_class_id' => $rolling->id, // INI YANG BENER, ambil dari ID tabel pivot
+            'schedule_class_id' => $rolling->id, 
             'status'            => 'hadir',
             'latitude'          => $request->latitude,
             'longtitude'         => $request->longtitude,
@@ -118,7 +121,7 @@ class AttendanceController extends Controller implements HasMiddleware
             'success' => true,
             'message' => 'Attendance recorded successfully!',
             'data'    => $attendance
-        ], 201);
+        ], 200);
     }
 
     public function update(Request $request, $id)
