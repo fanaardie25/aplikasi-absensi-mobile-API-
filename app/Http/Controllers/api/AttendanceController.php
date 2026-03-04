@@ -10,6 +10,8 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller implements HasMiddleware
