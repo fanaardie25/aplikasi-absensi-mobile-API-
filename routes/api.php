@@ -69,6 +69,8 @@ Route::group(['prefix' => 'user'], function () {
     Route::get('/{id}', [UserController::class, 'show']);
     Route::put('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
+    Route::get('/activity/latest',[UserController::class,'getLatestActivity']);
+    Route::get('/activity/all',[UserController::class,'getAllActivity']);
 });
 
 //class 

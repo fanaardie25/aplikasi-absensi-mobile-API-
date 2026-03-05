@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\User;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller implements HasMiddleware
 {
@@ -15,7 +19,7 @@ class UserController extends Controller implements HasMiddleware
     {
         return [
             'auth:sanctum',
-            new Middleware('role:admin'),
+            new Middleware('role:admin', except: ['getLatestActivity','getAllActivity']),
         ];
     }
 
@@ -121,6 +125,44 @@ class UserController extends Controller implements HasMiddleware
         return response()->json([
             'success' => true,
             'message' => 'User deleted successfully'
+        ]);
+    }
+
+    public function getLatestActivity()
+    {
+        $user = FacadesAuth::user();
+        $activity = Attendance::select([
+                'id', 
+                'status', 
+                DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
+            ])
+            ->where('student_id', $user->id)
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $activity
+        ]);
+    }
+
+    public function getAllActivity()
+    {
+        $user = FacadesAuth::user();
+        $activity = Attendance::select([
+                'id', 
+                'status', 
+                'photo_path',
+                DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
+            ])
+            ->where('student_id', $user->id)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $activity
         ]);
     }
 }

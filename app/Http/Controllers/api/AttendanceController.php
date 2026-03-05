@@ -61,6 +61,27 @@ class AttendanceController extends Controller implements HasMiddleware
         ]);
 
         $user = Auth::user();
+        $now = now(); 
+        // --- LOGIKA PEMBATASAN WAKTU ---
+        $start = now()->setTime(12, 0, 0); // 12:00:00
+        $end = now()->setTime(14, 0, 0);   // 14:00:00
+
+        if ($now->lt($start)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
+            ], 403);
+        }
+
+        if ($now->gt($end)) {
+            // Jika lewat jam 2, kita tidak simpan 'hadir', 
+            // tapi kembalikan pesan bahwa waktu sudah habis.
+            return response()->json([
+                'success' => false,
+                'message' => 'Waktu absen sudah habis (Batas jam 14:00).'
+            ], 403);
+        }
+    // -------------------------------
     
         $rolling = DB::table('schedule_classes')
             ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
