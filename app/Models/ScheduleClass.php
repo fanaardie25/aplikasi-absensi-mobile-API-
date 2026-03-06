@@ -25,4 +25,9 @@ class ScheduleClass extends Model
     {
         return $this->belongsTo(ScheduleClass::class, 'schedule_class_id');
     }
+
+    public function fridaySchedule()
+    {
+        return $this->belongsTo(FridaySchedule::class, 'schedule_id');
+    }
 }

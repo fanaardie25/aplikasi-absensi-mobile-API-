@@ -11,17 +11,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/me', function (Request $request) {
-    $user = $request->user()->load('schoolClass');
+    $user = $request->user()->load(['schoolClass'])
+        ->loadCount(['attendances as hadir_count' => function ($query) {
+            $query->where('status', 'hadir');
+        }]);
     
     $todayDate = now()->format('Y-m-d');
 
-    $userSchedule = ScheduleClass::where('class_id',$user->schoolClass->id)
-                        ->whereDate('created_at', $todayDate)
-                        ->first();
+    $userSchedule = ScheduleClass::where('class_id', $user->class_id)
+        ->whereHas('fridaySchedule', function ($query) use ($todayDate) {
+            $query->whereDate('date', $todayDate);
+        })
+        ->first();
 
-    $hasScheduleToday = $user->schoolClass->schedules()
-        ->where('date', $todayDate) 
-        ->exists();
+    $hasScheduleToday = !is_null($userSchedule);
 
     $attendanceToday = Attendance::where('student_id', $user->id)
         ->whereDate('created_at', $todayDate)
@@ -29,12 +32,12 @@ Route::get('/me', function (Request $request) {
 
 
     return response()->json([
-        'id'                 => $user->id,
+        'id'                 => $user->id,  
         'name'               => $user->name,
         'email'              => $user->email,
         'role'               => $user->role, 
         'nis'                => $user->nis,  
-        'class_id'           => $user->class_id,
+        'class_id'           => $user->class_id ?? null,
         'profile_photo_path' => $user->profile_photo_url ?? '',
         'schedule_id'       =>  $userSchedule->schedule_id ?? null,
         
@@ -50,7 +53,7 @@ Route::get('/me', function (Request $request) {
         'is_schedule_open'   => $hasScheduleToday,
         'is_absent_today'    => !is_null($attendanceToday),
         'stats' => [
-            'hadir'       => Attendance::where('student_id', $user->id)->count(),
+            'hadir'       => $user->hadir_count,
             'total_pekan' => 15
         ]
     ]);
@@ -97,5 +100,4 @@ Route::group(['prefix' => 'attendance'], function () {
     Route::post('/', [AttendanceController::class, 'store']);
     Route::get('/{id}', [AttendanceController::class, 'show']);
     Route::put('/{id}', [AttendanceController::class, 'update']);
-    // Route::delete('/{id}', [AttendanceController::class, 'destroy']);
 });

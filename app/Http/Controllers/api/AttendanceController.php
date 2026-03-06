@@ -64,7 +64,7 @@ class AttendanceController extends Controller implements HasMiddleware
         $now = now(); 
         // --- LOGIKA PEMBATASAN WAKTU ---
         $start = now()->setTime(12, 0, 0); // 12:00:00
-        $end = now()->setTime(14, 0, 0);   // 14:00:00
+        $end = now()->setTime(13, 0, 0);   // 13:00:00
 
         if ($now->lt($start)) {
             return response()->json([
@@ -74,14 +74,12 @@ class AttendanceController extends Controller implements HasMiddleware
         }
 
         if ($now->gt($end)) {
-            // Jika lewat jam 2, kita tidak simpan 'hadir', 
-            // tapi kembalikan pesan bahwa waktu sudah habis.
             return response()->json([
                 'success' => false,
-                'message' => 'Waktu absen sudah habis (Batas jam 14:00).'
+                'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
             ], 403);
         }
-    // -------------------------------
+        // -------------------------------
     
         $rolling = DB::table('schedule_classes')
             ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
@@ -107,14 +105,13 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($alreadyAttended) {
             return response()->json([
                 'success' => false,
-                'message' => 'You have already checked in today.'
+                'message' => 'Kamu Sudah Absen Hari ini'
             ], 422);
         }
-
     
-        $schoolLat = -7.390085504631045;
-        $schoolLong = 110.51753388175834;
-        $radius = 50; 
+        $schoolLat = -7.390022513649234;
+        $schoolLong = 110.51808635390792;
+        $radius = 100; 
 
         $distance = $this->calculateDistance($request->latitude, $request->longtitude, $schoolLat, $schoolLong);
 
@@ -137,7 +134,7 @@ class AttendanceController extends Controller implements HasMiddleware
             'status'            => 'hadir',
             'latitude'          => $request->latitude,
             'longtitude'         => $request->longtitude,
-            'photo_path'        => Storage::url($path),
+            'photo_path'        => $path,
         ]);
 
         return response()->json([
