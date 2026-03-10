@@ -23,7 +23,7 @@ class AcademicYearResource extends Resource
 {
     protected static ?string $model = AcademicYear::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDateRange;
 
     protected static ?string $recordTitleAttribute = 'Tahun Ajaran';
     protected static ?string $navigationLabel = "Tahun Ajaran";
@@ -53,6 +53,7 @@ class AcademicYearResource extends Resource
             ->recordTitleAttribute('Tahun Ajaran')
             ->columns([
                 TextColumn::make('year')
+                    ->label('Tahun Pelajaran')
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Active')
