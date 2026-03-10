@@ -61,7 +61,13 @@ class UserForm
                     ->image()
                     ->imageEditor() 
                     ->maxSize(1024)
-                    ->helperText('Format: JPG/PNG, Maksimal 1MB')
+                    ->helperText('Format: JPG/PNG, Maksimal 1MB'),
+                Toggle::make('is_active')
+                    ->label('Akun Aktif')
+                    ->default(true)
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->helperText('Jika dinonaktifkan, siswa tidak akan bisa login ke aplikasi.'),
             ]);
     }
 }

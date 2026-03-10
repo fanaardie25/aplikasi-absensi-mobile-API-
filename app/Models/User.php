@@ -27,7 +27,9 @@ class User extends Authenticatable
         'role',
         'nis',
         'class_id',
-        'profile_photo_path'
+        'profile_photo_path',
+        'nip',
+        'is_active'
     ];
 
     /**
@@ -50,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -61,5 +64,10 @@ class User extends Authenticatable
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'student_id');
+    }
+
+    public function supervisedClasses()
+    {
+        return $this->hasMany(SchoolClass::class, 'teacher_id');
     }
 }

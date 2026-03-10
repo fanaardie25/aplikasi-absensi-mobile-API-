@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Filament\Resources\Users\Pages;
+namespace App\Filament\Resources\Teachers\Pages;
 
-use App\Filament\Imports\SiswaImporter;
-use App\Filament\Resources\Users\UserResource;
+use App\Filament\Imports\GuruImporter;
+use App\Filament\Resources\Teachers\TeacherResource;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Response;
 
-class ListUsers extends ListRecords
+class ListTeachers extends ListRecords
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = TeacherResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -23,17 +23,17 @@ class ListUsers extends ListRecords
             ->icon('heroicon-o-document-arrow-down')
             ->color('gray')
             ->action(function () {
-                $columns = ['name', 'email', 'nis']; 
+                $columns = ['name', 'email', 'nip']; 
                 $csvData = implode(';', $columns) . "\n";
-                $csvData .= "Contoh Nama;contoh@satamail.my.id;p.12345";
+                $csvData .= "ContohNama;contoh@gmail.com;1324672344";
 
                 return Response::streamDownload(function () use ($csvData) {
                     echo $csvData;
                 }, 'template_siswa.csv');
             }),
-            ImportAction::make('importStudents')
-                ->label('Import Siswa')
-                ->importer(SiswaImporter::class)
+            ImportAction::make('importteachers')
+                ->label('Import Guru')
+                ->importer(GuruImporter::class)
                 ->color('info')
                 ->icon('heroicon-o-user-group'),
         ];

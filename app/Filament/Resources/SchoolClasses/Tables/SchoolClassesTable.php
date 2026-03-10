@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\SchoolClasses\Tables;
 
-use Filament\Actions\ActionGroup;
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -24,9 +24,9 @@ class SchoolClassesTable
                 TextColumn::make('name')
                     ->label('Kelas')
                     ->searchable(),
-                TextColumn::make('class_teacher')
-                    ->label('Wali Kelas'),
-                TextColumn::make('academic_year')
+                TextColumn::make('teacher.name')
+                    ->label('Guru Pembimbing'),
+                TextColumn::make('academicYear.year')
                     ->label('Tahun Ajaran'),
                 IconColumn::make('is_active')
                     ->label('Active')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SchoolClasses\Schemas;
 
+use App\Models\AcademicYear;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -57,7 +58,7 @@ class SchoolClassForm
                             ->afterStateUpdated(fn (Set $set, Get $get) => self::updateName($set, $get)),
                     ]),
 
-                Grid::make(2)
+                Grid::make(3)
                     ->schema([
                         TextInput::make('class_teacher')
                             ->label('Wali Kelas')
@@ -68,6 +69,16 @@ class SchoolClassForm
                             ->label('Tahun Ajaran')
                             ->placeholder('2023/2024')
                             ->required(),
+
+                        Select::make('academic_year_id')
+                            ->label('Tahun Ajaran')
+                            ->options(
+                                \App\Models\AcademicYear::all()->mapWithKeys(function ($item) {
+                                    return [$item->id => $item->year . ($item->is_active ? ' (Aktif)' : '')];
+                                })
+                            )
+                            ->default(\App\Models\AcademicYear::where('is_active', true)->first()?->id) 
+                            ->required(),
                     ]),
 
                 Toggle::make('is_active')
@@ -76,7 +87,7 @@ class SchoolClassForm
                     ->offColor('danger')
                     ->default(true),
             ]),
-         ]);
+         ])->columns(1);
     }
 
 
