@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class SchoolClassForm
 {
@@ -58,16 +59,17 @@ class SchoolClassForm
                             ->afterStateUpdated(fn (Set $set, Get $get) => self::updateName($set, $get)),
                     ]),
 
-                Grid::make(3)
+                Grid::make(2)
                     ->schema([
-                        TextInput::make('class_teacher')
-                            ->label('Wali Kelas')
-                            ->required()
-                            ->maxLength(255),
-
-                        TextInput::make('academic_year')
-                            ->label('Tahun Ajaran')
-                            ->placeholder('2023/2024')
+                        Select::make('teacher_id')
+                            ->label('Guru Pembimbing')
+                            ->searchable()
+                            ->relationship(
+                                'teacher', 
+                                'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('role', 'teacher')
+                            )
+                            ->preload()
                             ->required(),
 
                         Select::make('academic_year_id')

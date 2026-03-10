@@ -17,8 +17,6 @@ return new class extends Migration
             $table->integer('grade');
             $table->string('major'); 
             $table->string('sequence');
-            $table->string('class_teacher');
-            $table->string('academic_year');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

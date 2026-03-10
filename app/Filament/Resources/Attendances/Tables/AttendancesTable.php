@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Attendances\Tables;
 
+use App\Filament\Exports\KehadiranExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -82,29 +84,38 @@ class AttendancesTable
                 })
             ])
             ->headerActions([
-                Action::make('export_pdf')
-                    ->label('Download PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('danger')
-                    ->action(function ($livewire) {
-                        $records = $livewire->getFilteredTableQuery()->get();
+                // Action::make('export_pdf')
+                //     ->label('Download PDF')
+                //     ->icon('heroicon-o-document-arrow-down')
+                //     ->color('danger')
+                //     ->action(function ($livewire) {
+                //         $records = $livewire->getFilteredTableQuery()->get();
 
-                        $records = $records->sortBy('student.schoolClass.name');
-                        $filters = $livewire->tableFilters;
-                        $startDate = $filters['created_at']['from'] ?? null;
-                        $endDate = $filters['created_at']['until'] ?? null;
+                //         $records = $records->sortBy('student.schoolClass.name');
+                //         $filters = $livewire->tableFilters;
+                //         $startDate = $filters['created_at']['from'] ?? null;
+                //         $endDate = $filters['created_at']['until'] ?? null;
 
-                        $pdf = Pdf::loadView('pdf.attendance', [
-                            'records' => $records,
-                            'startDate' => $startDate,
-                            'endDate' => $endDate
-                        ]);
+                //         $pdf = Pdf::loadView('pdf.attendance', [
+                //             'records' => $records,
+                //             'startDate' => $startDate,
+                //             'endDate' => $endDate
+                //         ]);
 
-                        return response()->streamDownload(
-                            fn () => print($pdf->output()), 
-                            'rekap-presensi-' . now()->format('Y-m-d') . '.pdf'
-                        );
-                    }),
+                //         return response()->streamDownload(
+                //             fn () => print($pdf->output()), 
+                //             'rekap-presensi-' . now()->format('Y-m-d') . '.pdf'
+                //         );
+                //     }),
+                    ExportAction::make()
+                    ->exporter(KehadiranExporter::class)
+                    ->label('Unduh Laporan')
+                    ->icon('heroicon-o-arrow-down-tray') 
+                    ->color('success') 
+                    ->columnMapping(false)
+                    ->modalHeading('Ekspor Laporan Kehadiran')
+                    ->modalDescription('File akan diunduh dalam format XLSX. Pastikan filter sudah sesuai sebelum mengunduh.')
+                    ->modalSubmitActionLabel('Mulai Ekspor')
             ])
             ->recordActions([
             ])
