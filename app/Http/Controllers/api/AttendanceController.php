@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class AttendanceController extends Controller implements HasMiddleware
 {
@@ -63,23 +64,23 @@ class AttendanceController extends Controller implements HasMiddleware
         $user = Auth::user();
         $now = now(); 
         // --- LOGIKA PEMBATASAN WAKTU ---
-        $start = now()->setTime(12, 0, 0); // 12:00:00
-        $end = now()->setTime(13, 0, 0);   // 13:00:00
+        // $start = now()->setTime(12, 0, 0); // 12:00:00
+        // $end = now()->setTime(13, 0, 0);   // 13:00:00
 
-        if ($now->lt($start)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
-            ], 403);
-        }
+        // if ($now->lt($start)) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
+        //     ], 403);
+        // }
 
-        if ($now->gt($end)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
-            ], 403);
-        }
-        // -------------------------------
+        // if ($now->gt($end)) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
+        //     ], 403);
+        // }
+        // // -------------------------------
     
         $rolling = DB::table('schedule_classes')
             ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
@@ -123,25 +124,43 @@ class AttendanceController extends Controller implements HasMiddleware
         }
 
      
-        $image = $request->file('photo');
-        $imageName = time() . '_' . $user->id . '.' . $image->getClientOriginalExtension();
-        $path = $image->storeAs('attendances', $imageName, 'public');
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $imageName = time() . '_' . $user->id . '.webp'; // Pakai WebP biar enteng parah
+            
+            $image = Image::read($file);
+            $image->scale(width: 600); 
+            $encoded = $image->toWebp(65);
+            
+            Storage::disk('public')->put('attendances/' . $imageName, (string) $encoded);
+
+            $path = 'attendances/' . $imageName;
+        }
 
        
-        $attendance = Attendance::create([
-            'student_id'        => $user->id,
-            'schedule_class_id' => $rolling->id, 
-            'status'            => 'hadir',
-            'latitude'          => $request->latitude,
-            'longtitude'         => $request->longtitude,
-            'photo_path'        => $path,
-        ]);
+        try {
+            $attendance = Attendance::create([
+                'student_id'        => $user->id,
+                'schedule_class_id' => $rolling->id, 
+                'status'            => 'hadir',
+                'latitude'          => $request->latitude,
+                'longtitude'         => $request->longtitude,
+                'photo_path'        => $path,
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Attendance recorded successfully!',
+                'data'    => $attendance
+            ], 200);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Attendance recorded successfully!',
-            'data'    => $attendance
-        ], 200);
+        } catch (\Exception $e) {
+            Storage::disk('public')->delete($path);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)
