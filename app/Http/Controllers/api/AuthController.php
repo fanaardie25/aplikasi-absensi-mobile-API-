@@ -17,6 +17,25 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+
+            // 1. CEK STATUS AKTIF
+            if ($user->is_active !== true) {
+                Auth::logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akun Anda sudah tidak aktif'
+                ], 403);
+            }
+
+            // 2. CEK APAKAH SUDAH DI-PLOTTING KE KELAS
+            if (is_null($user->class_id)) {
+                Auth::logout();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akun Anda belum terdaftar di kelas manapun. Hubungi Admin'
+                ], 403);
+            }
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -28,8 +47,8 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'Invalid credentials'
-            ], 401);
+            'message' => 'Email atau password salah.'
+        ], 401);
     }
 
     public function logout(Request $request)
