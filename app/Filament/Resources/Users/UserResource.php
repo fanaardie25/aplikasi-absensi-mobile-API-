@@ -14,12 +14,15 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserCircle;
+    protected static string|UnitEnum|null $navigationGroup = "Data Master";
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'Siswa';
     protected static ?string $navigationLabel = "Siswa";

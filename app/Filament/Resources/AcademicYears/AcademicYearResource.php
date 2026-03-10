@@ -18,12 +18,15 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AcademicYearResource extends Resource
 {
     protected static ?string $model = AcademicYear::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CalendarDateRange;
+    protected static string|UnitEnum|null $navigationGroup = "Data Master";
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'Tahun Ajaran';
     protected static ?string $navigationLabel = "Tahun Ajaran";
