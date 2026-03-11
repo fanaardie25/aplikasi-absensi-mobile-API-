@@ -37,7 +37,7 @@ class AttendancesTable
                 ->description(fn ($record) => "NIS: {$record->student->nis}"),
 
 
-            TextColumn::make('student.schoolClass.name')
+            TextColumn::make('class.name')
                 ->label('Kelas')
                 ->badge()
                 ->color('gray'),
@@ -72,6 +72,8 @@ class AttendancesTable
                     'hadir' => 'Hadir',
                     'tidak_hadir' => 'tidak hadir',
                 ]),
+                SelectFilter::make('Kelas')
+                ->relationship('class','name'),
                 Filter::make('created_at')
                 ->schema([
                     DatePicker::make('from'),

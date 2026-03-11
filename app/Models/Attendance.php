@@ -14,6 +14,10 @@ class Attendance extends Model
         return $this->belongsTo(User::class, 'student_id');
     }
 
+    public function class() : BelongsTo {
+        return $this->belongsTo(SchoolClass::class,'class_id');
+    }
+
     protected static function booted()
     {
         static::creating(function ($attendance) {
