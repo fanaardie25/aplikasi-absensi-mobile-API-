@@ -38,7 +38,7 @@ Route::get('/me', function (Request $request) {
         'role'               => $user->role, 
         'nis'                => $user->nis,  
         'class_id'           => $user->class_id ?? null,
-        'profile_photo_path' => $user->profile_photo_url ?? '',
+        'profile_photo_path' => $user->profile_photo_path ?? '',
         'schedule_id'       =>  $userSchedule->schedule_id ?? null,
         
 
