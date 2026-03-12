@@ -81,6 +81,7 @@ Route::group(['prefix' => 'user'], function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::get('/activity/latest',[UserController::class,'getLatestActivity']);
     Route::get('/activity/all',[UserController::class,'getAllActivity']);
+    Route::post('/update/profile', [UserController::class, 'updatePhotoProfile']);
 });
 
 //class 

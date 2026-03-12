@@ -5,12 +5,13 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\User;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class UserController extends Controller implements HasMiddleware
 {
@@ -19,7 +20,7 @@ class UserController extends Controller implements HasMiddleware
     {
         return [
             'auth:sanctum',
-            new Middleware('role:admin', except: ['getLatestActivity','getAllActivity']),
+            new Middleware('role:admin', except: ['getLatestActivity','getAllActivity','updatePhotoProfile']),
         ];
     }
 
@@ -166,5 +167,41 @@ class UserController extends Controller implements HasMiddleware
             'success' => true,
             'data' => $activity
         ]);
+    }
+
+    public function updatePhotoProfile(Request $request){
+
+        $request->validate([
+            'photo' => 'required|image|max:2048'
+        ]);
+
+        $user = FacadesAuth::user();
+
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $imageName = time() . '_' . $user->id . '.webp';
+            
+            $image = Image::read($file);
+            $image->scale(width: 600); 
+            $encoded = $image->toWebp(65);
+            
+            Storage::disk('public')->put('profile/' . $imageName, (string) $encoded);
+
+            $path = 'profile/' . $imageName;
+
+            $currentUser = User::find($user->id);
+
+            $currentUser->update([
+                'profile_photo_path' => $path
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto profil berhasil diperbarui',
+            ]);
+
+        }
+
+        return response()->json(['success' => false, 'message' => 'File tidak ditemukan'], 400);
     }
 }
