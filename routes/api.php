@@ -11,10 +11,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/me', function (Request $request) {
-    $user = $request->user()->load(['schoolClass'])
-        ->loadCount(['attendances as hadir_count' => function ($query) {
+    $user = $request->user()->load(['schoolClass.teacher'])
+    ->loadCount([
+        'attendances as hadir_count' => function ($query) {
             $query->where('status', 'hadir');
-        }]);
+        },
+        'attendances as alpa_count' => function ($query) {
+            $query->where('status', 'tidak_hadir');
+        },
+    ]);
     
     $todayDate = now()->format('Y-m-d');
 
@@ -42,19 +47,21 @@ Route::get('/me', function (Request $request) {
         'schedule_id'       =>  $userSchedule->schedule_id ?? null,
         
 
-        'school_class'       => [
+        'school_class' => $user->schoolClass ? [
             'id'       => $user->schoolClass->id,
             'name'     => $user->schoolClass->name,
             'grade'    => $user->schoolClass->grade,
             'major'    => $user->schoolClass->major,
             'sequence' => $user->schoolClass->sequence,
-        ],
+        ] : null,
+
+        'teacher' => $user->schoolClass->teacher->name ?? null,
 
         'is_schedule_open'   => $hasScheduleToday,
         'is_absent_today'    => !is_null($attendanceToday),
         'stats' => [
             'hadir'       => $user->hadir_count,
-            'total_pekan' => 15
+            'tidak_hadir' => $user->alpa_count
         ]
     ]);
 })->middleware('auth:sanctum');

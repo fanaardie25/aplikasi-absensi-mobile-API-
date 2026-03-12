@@ -137,6 +137,7 @@ class UserController extends Controller implements HasMiddleware
                 DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
             ])
             ->where('student_id', $user->id)
+            ->where('status', 'hadir')
             ->latest()
             ->limit(5)
             ->get();
@@ -157,6 +158,7 @@ class UserController extends Controller implements HasMiddleware
                 DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
             ])
             ->where('student_id', $user->id)
+            ->where('status', 'hadir')
             ->latest()
             ->get();
 
