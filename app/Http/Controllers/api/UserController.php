@@ -191,6 +191,10 @@ class UserController extends Controller implements HasMiddleware
 
             $currentUser = User::find($user->id);
 
+            if ($currentUser->profile_photo_path) {
+                Storage::disk('public')->delete($currentUser->profile_photo_path);
+            }
+
             $currentUser->update([
                 'profile_photo_path' => $path
             ]);
