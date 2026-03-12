@@ -55,6 +55,13 @@ class AttendancesTable
                     'izin' => 'warning',
                     'tidak_hadir' => 'danger',
                     default => 'gray',
+                })
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'hadir' => 'Hadir',
+                    'tidak_hadir' => 'Alpa',
+                    'izin' => 'Izin',
+                    'sakit' => 'Sakit',
+                    default => ucfirst($state),
                 }),
 
             TextColumn::make('latitude')

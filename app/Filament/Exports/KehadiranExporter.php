@@ -13,7 +13,7 @@ class KehadiranExporter extends Exporter
     protected static ?string $model = Attendance::class;
     public function getFileName(Export $export): string
     {
-        return "Laporan-Kehadiran-" . now()->format('d-m-Y');
+        return "Laporan-Absensi-SATA" . now()->format('d-m-Y')." ".$export->getKey();
     }
 
     public static function getColumns(): array
@@ -33,7 +33,14 @@ class KehadiranExporter extends Exporter
                 ->formatStateUsing(fn ($state) => $state->format('d/m/Y')),
 
             ExportColumn::make('status')
-                ->label('Status'),
+                ->label('Status')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'hadir' => 'H',
+                        'tidak_hadir' => 'A',
+                        'izin' => 'I',
+                        'sakit' => 'S',
+                        default => ucfirst($state),
+                    }),
 
             ExportColumn::make('latitude')
                 ->label('Lat'),
