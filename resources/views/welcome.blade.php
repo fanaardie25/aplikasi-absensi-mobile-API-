@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Datang - Sistem Presensi Sekolah</title>
+    @if(isset($site_settings['site_favicon']))
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $site_settings['site_favicon']) }}">
+    @else
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    @endif
+    <title>{{ $site_settings['site_name'] ?? 'Sistem Absensi' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -15,7 +20,7 @@
     <div class="absolute inset-0 z-0 opacity-20" style="background-image: radial-gradient(#2f333c 1px, transparent 1px); background-size: 30px 30px;"></div>
 
     <div class="z-10 text-center mb-16 px-4">
-        <span class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold tracking-[0.3em] uppercase text-emerald-500 mb-6 inline-block">Official Portal Presensi</span>
+        <span class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold tracking-[0.3em] uppercase text-emerald-500 mb-6 inline-block">Official Portal Presensi Sholat Jumat</span>
         <h1 class="text-5xl md:text-6xl font-black tracking-tighter mb-4 uppercase">
             SMKN <span class="text-emerald-500">Tengaran</span>
         </h1>
@@ -52,7 +57,7 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-bold mb-3 tracking-tight">Guru Pembimbing</h2>
-                <p class="text-slate-500 text-sm leading-relaxed">Pantau presensi harian siswa binaan, rekap kehadiran kelas, dan jadwal KBM.</p>
+                <p class="text-slate-500 text-sm leading-relaxed">Pantau presensi harian siswa binaan dan rekap kehadiran kelas.</p>
                 <div class="mt-10 flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
                     Mulai Monitoring <span class="ml-2 group-hover:translate-x-2 transition-transform duration-300">→</span>
                 </div>

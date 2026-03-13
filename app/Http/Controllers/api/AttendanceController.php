@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\ScheduleClass;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -54,6 +55,14 @@ class AttendanceController extends Controller implements HasMiddleware
     }
     public function store(Request $request)
     {
+            $settings = Setting::whereIn('key', [
+            'school_latitude', 
+            'school_longitude', 
+            'attendance_radius',
+            'start_time',
+            'end_time'
+        ])->pluck('value', 'key');
+
         $request->validate([
             'schedule_id' => ['required', 'exists:friday_schedules,id'],
             'latitude'    => ['required', 'string'],
@@ -65,8 +74,11 @@ class AttendanceController extends Controller implements HasMiddleware
         $now = now(); 
         
         // --- LOGIKA PEMBATASAN WAKTU ---
-        $start = now()->setTime(12, 0, 0); // 12:00:00
-        $end = now()->setTime(13, 0, 0);   // 13:00:00
+        $startTimeStr = $settings->get('start_time', '12:00');
+        $endTimeStr = $settings->get('end_time', '13:00');
+
+        $start = now()->setTimeFromTimeString($startTimeStr);
+        $end = now()->setTimeFromTimeString($endTimeStr);
 
         if ($now->lt($start)) {
             return response()->json([
@@ -78,7 +90,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($now->gt($end)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
+                'message' => "Waktu absen sudah habis (Batas jam {$endTimeStr})."
             ], 403);
         }
         // -------------------------------
@@ -112,9 +124,9 @@ class AttendanceController extends Controller implements HasMiddleware
             ], 422);
         }
     
-        $schoolLat = -7.390022513649234;
-        $schoolLong = 110.51808635390792;
-        $radius = 100; 
+        $schoolLat = $settings->get('school_latitude', -7.390022513649234);
+        $schoolLong = $settings->get('school_longitude', 110.51808635390792);
+        $radius = (int) $settings->get('attendance_radius', 100);
 
         $distance = $this->calculateDistance($request->latitude, $request->longtitude, $schoolLat, $schoolLong);
 
