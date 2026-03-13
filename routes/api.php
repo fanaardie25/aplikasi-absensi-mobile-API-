@@ -74,38 +74,12 @@ Route::group(['prefix' => 'auth'], function () {
 
 //user
 Route::group(['prefix' => 'user'], function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::post('/', [UserController::class, 'store']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
     Route::get('/activity/latest',[UserController::class,'getLatestActivity']);
     Route::get('/activity/all',[UserController::class,'getAllActivity']);
     Route::post('/update/profile', [UserController::class, 'updatePhotoProfile']);
 });
 
-//class 
-Route::group(['prefix' => 'class'], function () {
-    Route::get('/', [SchoolClassController::class, 'index']);
-    Route::post('/', [SchoolClassController::class, 'store']);
-    Route::get('/{id}', [SchoolClassController::class, 'show']);
-    Route::put('/{id}', [SchoolClassController::class, 'update']);
-    Route::delete('/{id}', [SchoolClassController::class, 'destroy']);
-});
-
-//schedule
-Route::group(['prefix' => 'schedule'], function () {
-    Route::get('/', [FridayScheduleController::class, 'index']);
-    Route::post('/', [FridayScheduleController::class, 'store']);
-    Route::get('/{id}', [FridayScheduleController::class, 'show']);
-    Route::put('/{id}', [FridayScheduleController::class, 'update']);
-    Route::delete('/{id}', [FridayScheduleController::class, 'destroy']);
-});
-
 //attendance
 Route::group(['prefix' => 'attendance'], function () {
-    Route::get('/', [AttendanceController::class, 'index']);
     Route::post('/', [AttendanceController::class, 'store']);
-    Route::get('/{id}', [AttendanceController::class, 'show']);
-    Route::put('/{id}', [AttendanceController::class, 'update']);
 });
