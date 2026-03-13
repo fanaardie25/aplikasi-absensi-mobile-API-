@@ -16,6 +16,6 @@ class FridaySchedule extends Model
             'schedule_classes', 
             'schedule_id',     
             'class_id' 
-        )->withTimestamps();
+        )->withPivot('id')->withTimestamps();
     }
 }

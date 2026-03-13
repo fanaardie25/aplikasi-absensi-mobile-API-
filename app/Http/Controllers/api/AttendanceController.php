@@ -63,24 +63,25 @@ class AttendanceController extends Controller implements HasMiddleware
 
         $user = Auth::user();
         $now = now(); 
+        
         // --- LOGIKA PEMBATASAN WAKTU ---
-        // $start = now()->setTime(12, 0, 0); // 12:00:00
-        // $end = now()->setTime(13, 0, 0);   // 13:00:00
+        $start = now()->setTime(12, 0, 0); // 12:00:00
+        $end = now()->setTime(13, 0, 0);   // 13:00:00
 
-        // if ($now->lt($start)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
-        //     ], 403);
-        // }
+        if ($now->lt($start)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
+            ], 403);
+        }
 
-        // if ($now->gt($end)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
-        //     ], 403);
-        // }
-        // // -------------------------------
+        if ($now->gt($end)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Waktu absen sudah habis (Batas jam 13:00).'
+            ], 403);
+        }
+        // -------------------------------
     
         $rolling = DB::table('schedule_classes')
             ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
@@ -101,6 +102,7 @@ class AttendanceController extends Controller implements HasMiddleware
   
         $alreadyAttended = Attendance::where('student_id', $user->id)
             ->where('schedule_class_id', $rolling->id)
+            ->whereDate('created_at', $now->toDateString())
             ->exists();
 
         if ($alreadyAttended) {
@@ -126,7 +128,7 @@ class AttendanceController extends Controller implements HasMiddleware
      
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $imageName = time() . '_' . $user->id . '.webp'; // Pakai WebP biar enteng parah
+            $imageName = time() . '_' . $user->id . '.webp'; 
             
             $image = Image::read($file);
             $image->scale(width: 600); 
