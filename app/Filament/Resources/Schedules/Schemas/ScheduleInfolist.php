@@ -25,9 +25,12 @@ class ScheduleInfolist
                                $pivotIds = DB::table('schedule_classes')
                                     ->where('schedule_id', $record->id)
                                     ->pluck('id'); 
+                                    
+                                $targetDate = $record->date;
 
                                 return Attendance::whereIn('schedule_class_id', $pivotIds)
                                     ->with('student') 
+                                    ->whereDate('created_at', $targetDate)
                                     ->get();
                             })
                             ->schema([
