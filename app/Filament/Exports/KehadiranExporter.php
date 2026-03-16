@@ -19,6 +19,16 @@ class KehadiranExporter extends Exporter
     public static function getColumns(): array
     {
         return [
+            ExportColumn::make('photo_path')
+                ->label('Link Foto Bukti')
+                ->formatStateUsing(function ($state) {
+                    if (!$state || $state === 'null' || $state === '') {
+                        return '-';
+                    }
+
+                    return asset('storage/' . $state);
+                }),
+
             ExportColumn::make('student.name')
                 ->label('Nama Siswa'),
 
