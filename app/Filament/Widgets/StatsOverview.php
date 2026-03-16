@@ -11,7 +11,7 @@ class StatsOverview extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        
+
     $today = now()->toDateString();
 
     $activeStudentQuery = User::where('role', 'student')->where('is_active', true);
@@ -21,14 +21,14 @@ class StatsOverview extends StatsOverviewWidget
 
     return [
         Stat::make('Total Siswa Aktif', $totalSiswaAktif)
-            ->description('Jumlah siswa yang aktif sekolah')
+            ->description('Jumlah siswa aktif')
             ->descriptionIcon('heroicon-m-users')
             ->color('info'),
 
         Stat::make('Hadir Hari Ini', $sudahAbsen)
             ->description('Siswa yang sudah absen')
             ->descriptionIcon('heroicon-m-check-badge')
-            ->chart([7, 2, 10, 3, 15, 4, 17]) 
+                ->chart([7, 10, 5, 12, $sudahAbsen])
             ->color('success'),
 
         Stat::make('Belum Absen', $totalSiswaAktif - $sudahAbsen)

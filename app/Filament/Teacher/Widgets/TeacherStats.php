@@ -15,6 +15,7 @@ class TeacherStats extends StatsOverviewWidget
         $teacherId = Auth::id();
 
         $totalSiswa = User::where('role', 'student')
+            ->where('is_active',true)
             ->whereHas('schoolClass', fn($q) => $q->where('teacher_id', $teacherId))
             ->count();
 
@@ -26,7 +27,7 @@ class TeacherStats extends StatsOverviewWidget
 
         return [
             Stat::make('Total Siswa Bimbingan', $totalSiswa)
-                ->description('Total siswa')
+                ->description('Total siswa aktif')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('info'),
 
@@ -37,8 +38,8 @@ class TeacherStats extends StatsOverviewWidget
                 ->color('success'),
 
             Stat::make('Belum Absen', $belumAbsen)
-                ->description('Siswa yang perlu dicek')
-                ->descriptionIcon('heroicon-m-exclamation-triangle')
+                ->description('Siswa aktif yang belum presensi')
+                ->descriptionIcon('heroicon-m-x-circle')
                 ->color($belumAbsen > 0 ? 'danger' : 'success'),
         ];
     }
