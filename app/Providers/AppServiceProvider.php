@@ -31,5 +31,21 @@ class AppServiceProvider extends ServiceProvider
             );
         });
         View::share('site_settings', Setting::all()->pluck('value', 'key'));
+
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+            
+            $dbUrl = Setting::get('site_url');
+            $siteName = Setting::get('site_name');
+
+            if ($dbUrl) {
+                config(['app.url' => $dbUrl]);
+                \Illuminate\Support\Facades\URL::forceRootUrl($dbUrl);
+            }
+
+            if ($siteName) {
+                config(['app.name' => $siteName]);
+            }
+        }
     }
 }
