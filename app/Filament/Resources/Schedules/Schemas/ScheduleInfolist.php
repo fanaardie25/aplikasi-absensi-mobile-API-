@@ -29,7 +29,7 @@ class ScheduleInfolist
                                 $targetDate = $record->date;
 
                                 return Attendance::whereIn('schedule_class_id', $pivotIds)
-                                    ->with('student') 
+                                    ->with('student','student.schoolClass') 
                                     ->whereDate('created_at', $targetDate)
                                     ->get();
                             })
@@ -39,7 +39,7 @@ class ScheduleInfolist
                                     ->weight('bold'),
 
                                 TextEntry::make('student.schoolClass.name')
-                                    ->label('Nama Siswa')
+                                    ->label('Kelas')
                                     ->weight('bold'),
                                 
                                 TextEntry::make('created_at')
@@ -48,9 +48,17 @@ class ScheduleInfolist
                                     
                                 TextEntry::make('status') 
                                     ->badge()
+                                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                                            'hadir' => 'Hadir',
+                                            'tidak_hadir' => 'Alpa',
+                                            'izin' => 'Izin',
+                                            'sakit' => 'Sakit',
+                                            default => ucfirst($state),
+                                        })
                                     ->color(fn (string $state): string => match ($state) {
                                         'hadir' => 'success',
                                         'tidak_hadir' => 'danger',
+                                        'izin' => 'warning',
                                         default => 'gray',
                                     }),
                             ])

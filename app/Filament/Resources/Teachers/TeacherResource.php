@@ -39,6 +39,7 @@ class TeacherResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+        ->with('supervisedClasses', 'supervisedClasses.academicYear')
         ->where('role', 'teacher');
     }
 

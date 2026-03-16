@@ -19,9 +19,11 @@ class SchoolClassInfolist
                     ->description('Siswa yang ada di kelas ini.')
                     ->schema([
                         RepeatableEntry::make('students') 
+                            ->label('Daftar Murid')
+                            ->placeholder('Belum ada siswa yang terdaftar di kelas ini.')
                             ->schema([
                                 ImageEntry::make('profile_photo_path')
-                                    ->label('foto')
+                                    ->label('photo')
                                     ->circular()
                                     ->disk('public')
                                     ->defaultImageUrl(fn ($record) => "https://ui-avatars.com/api/?name=" . urlencode($record->name) . "&background=10B981&color=fff")

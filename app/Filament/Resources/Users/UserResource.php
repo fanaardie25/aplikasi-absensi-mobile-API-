@@ -42,6 +42,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+        ->with('schoolClass')
         ->where('role', 'student');
     }
 

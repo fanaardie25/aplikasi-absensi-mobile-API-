@@ -37,6 +37,7 @@ class SchoolClassResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            ->with('academicYear','students')
             ->where('teacher_id',Auth::id());
     }
 

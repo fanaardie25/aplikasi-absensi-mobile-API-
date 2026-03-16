@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class AttendanceResource extends Resource
@@ -31,6 +32,12 @@ class AttendanceResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return AttendanceForm::configure($schema);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+                        ->with('class','student');
     }
 
     public static function table(Table $table): Table

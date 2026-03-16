@@ -30,7 +30,11 @@ class UsersTable
             ->columns([
                 ImageColumn::make('profile_photo_path')
                     ->disk('public')
-                    ->label('Photo Profile'),
+                    ->circular()
+                    ->defaultImageUrl(fn ($record) => "https://ui-avatars.com/api/?name=" . urlencode($record->name) . "&background=10B981&color=fff")
+                    ->label('Photo Profile')
+                    ->imageSize(40)
+                    ->extraImgAttributes(['loading' => 'lazy']),
                 TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(), 
