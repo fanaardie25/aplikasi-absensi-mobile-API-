@@ -9,8 +9,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class TeachersTable
@@ -27,9 +32,31 @@ class TeachersTable
                     ->searchable(),
                 TextColumn::make('email')
                     ->searchable(),
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->icon(fn (bool $state): Heroicon => match ($state) {
+                        true => Heroicon::CheckCircle,
+                        false => Heroicon::XCircle,
+                    })
+                    ->color(fn (bool $state): string => match ($state) {
+                        false => 'danger',
+                        true => 'success',
+                    })
             ])
             ->filters([
-                //
+                Filter::make('guru_floating')
+                        ->label('Floating kelas')
+                        ->query(fn (Builder $query) => $query->whereDoesntHave('supervisedClasses'))
+                        ->indicator('Guru Tanpa Kelas Bimbingan')
+                        ->toggle(),
+
+                TernaryFilter::make('is_active')
+                    ->label('Status Guru')
+                    ->placeholder('Semua Status')
+                    ->indicator('status')
+                    ->trueLabel('Aktif')
+                    ->falseLabel('Non-Aktif')
+                    ->native(false),
             ])
             ->recordActions([
                 ViewAction::make(),

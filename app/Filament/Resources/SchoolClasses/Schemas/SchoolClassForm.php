@@ -67,7 +67,7 @@ class SchoolClassForm
                             ->relationship(
                                 'teacher', 
                                 'name',
-                                modifyQueryUsing: fn (Builder $query) => $query->where('role', 'teacher')
+                                modifyQueryUsing: fn (Builder $query) => $query->where('role', 'teacher')->where('is_active',true)
                             )
                             ->preload(),
 
