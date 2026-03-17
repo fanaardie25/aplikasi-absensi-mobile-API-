@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -48,21 +49,14 @@ class AttendancesTable
                 ->sortable(),
 
 
-            TextColumn::make('status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'hadir' => 'success',
-                    'izin' => 'warning',
-                    'tidak_hadir' => 'danger',
-                    default => 'gray',
-                })
-                ->formatStateUsing(fn (string $state): string => match ($state) {
+            SelectColumn::make('status')
+                ->options([
                     'hadir' => 'Hadir',
-                    'tidak_hadir' => 'Alpa',
+                    'sakit' => 'sakit',
                     'izin' => 'Izin',
-                    'sakit' => 'Sakit',
-                    default => ucfirst($state),
-                }),
+                    'tidak_hadir' => 'Alpa',
+                ])
+                ->selectablePlaceholder(false),
 
             TextColumn::make('latitude')
                 ->label('Koordinat')
@@ -76,7 +70,9 @@ class AttendancesTable
                 SelectFilter::make('status')
                 ->options([
                     'hadir' => 'Hadir',
-                    'tidak_hadir' => 'tidak hadir',
+                    'izin' => 'Izin',
+                    'sakit' => 'Sakit',
+                    'tidak_hadir' => 'Alpa',
                 ]),
                 SelectFilter::make('Kelas')
                 ->relationship('class','name'),

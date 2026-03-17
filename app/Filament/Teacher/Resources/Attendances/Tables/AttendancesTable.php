@@ -10,6 +10,7 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -46,22 +47,14 @@ class AttendancesTable
                 ->sortable(),
 
 
-            TextColumn::make('status')
-                ->badge()
-                ->formatStateUsing(fn (string $state): string => match ($state) {
+            SelectColumn::make('status')
+                ->options([
                     'hadir' => 'Hadir',
-                    'izin' => 'Izin',
                     'sakit' => 'sakit',
+                    'izin' => 'Izin',
                     'tidak_hadir' => 'Alpa',
-                    default => 'Tanpa Keterangan',
-                })
-                ->color(fn (string $state): string => match ($state) {
-                    'hadir' => 'success',
-                    'izin' => 'warning',
-                    'sakit' => 'primary',
-                    'tidak_hadir' => 'danger',
-                    default => 'gray',
-                }),
+                ])
+                ->selectablePlaceholder(false),
 
             TextColumn::make('latitude')
                 ->label('Koordinat')
@@ -71,6 +64,7 @@ class AttendancesTable
                 ->url(fn ($record) => "https://www.google.com/maps/search/?api=1&query={$record->latitude},{$record->longtitude}")
                 ->openUrlInNewTab(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
                 ->options([
