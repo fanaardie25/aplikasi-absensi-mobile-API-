@@ -12,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -69,12 +70,26 @@ class AcademicYearResource extends Resource
                         true => 'success',
                     })
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->before(function (DeleteAction $action, AcademicYear $record) {
+                        $count = AcademicYear::count();
+
+                        if ($count <= 1) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Gagal Menghapus')
+                                ->body('Data terakhir tidak boleh dihapus, Minimal ada 1 data.')
+                                ->send();
+                            $action->halt();
+
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -71,8 +71,7 @@ class AttendancesTable
                 ->formatStateUsing(fn () => 'Lihat Map')
                 ->url(fn ($record) => "https://www.google.com/maps/search/?api=1&query={$record->latitude},{$record->longtitude}")
                 ->openUrlInNewTab(),
-            ])
-            
+            ])->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
                 ->options([

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Attendance;
+use App\Models\SchoolClass;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -12,29 +12,31 @@ class StatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
 
-    $today = now()->toDateString();
+        $totalGuru = User::where('role', 'teacher')->where('is_active', true)->count();
 
-    $activeStudentQuery = User::where('role', 'student')->where('is_active', true);
-    
-    $totalSiswaAktif = (clone $activeStudentQuery)->count();
-    $sudahAbsen = Attendance::whereDate('created_at', $today)->count();
 
-    return [
-        Stat::make('Total Siswa Aktif', $totalSiswaAktif)
-            ->description('Jumlah siswa aktif')
-            ->descriptionIcon('heroicon-m-users')
-            ->color('info'),
+        $totalSiswa = User::where('role', 'student')
+            ->where('is_active', true)
+            ->count();
 
-        Stat::make('Hadir Hari Ini', $sudahAbsen)
-            ->description('Siswa yang sudah absen')
-            ->descriptionIcon('heroicon-m-check-badge')
-                ->chart([7, 10, 5, 12, $sudahAbsen])
-            ->color('success'),
 
-        Stat::make('Belum Absen', $totalSiswaAktif - $sudahAbsen)
-            ->description('Siswa aktif yang belum presensi')
-            ->descriptionIcon('heroicon-m-x-circle')
-            ->color($totalSiswaAktif - $sudahAbsen > 0 ? 'danger' : 'success'),
-    ];
+        $totalKelas = SchoolClass::count();
+
+        return [
+            Stat::make('Total Guru', $totalGuru)
+                ->description('Guru Aktif')
+                ->descriptionIcon('heroicon-m-academic-cap')
+                ->color('primary'),
+
+            Stat::make('Total Siswa', $totalSiswa)
+                ->description('Siswa aktif')
+                ->descriptionIcon('heroicon-m-users')
+                ->color('info'),
+
+            Stat::make('Total Kelas', $totalKelas)
+                ->description('kelas')
+                ->descriptionIcon('heroicon-m-rectangle-group')
+                ->color('success'),
+        ];
     }
 }

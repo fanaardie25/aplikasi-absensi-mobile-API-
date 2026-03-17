@@ -69,8 +69,7 @@ class SchoolClassForm
                                 'name',
                                 modifyQueryUsing: fn (Builder $query) => $query->where('role', 'teacher')
                             )
-                            ->preload()
-                            ->required(),
+                            ->preload(),
 
                         Select::make('academic_year_id')
                             ->label('Tahun Ajaran')
