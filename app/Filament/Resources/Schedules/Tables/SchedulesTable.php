@@ -20,8 +20,10 @@ class SchedulesTable
                     ->sortable(),
                 TextColumn::make('date')
                     ->date()
-                    ->sortable(),
-                TextColumn::make('description')
+                    ->sortable()
+                    ->label('Tanggal'),
+                TextColumn::make('description')->label('Deskripsi'),
+                TextColumn::make('teachers.name')->label('Imam')
             ])->defaultSort('id', 'desc')
             ->filters([
                 //

@@ -46,8 +46,15 @@ class ScheduleForm
                 ->relationship('classes', 'name')
                 ->preload() 
                 ->searchable()
-                ->required() 
-                ->columnSpanFull() 
+                ->required(),
+                Select::make('teacher_id') 
+                    ->relationship('teachers', 'name', function ($query) {
+                        return $query->where('role','teacher'); 
+                    })
+                    ->label('Pilih Imam')
+                    ->preload() 
+                    ->searchable()
+                    ->required() ,
             ]);
     }
 }

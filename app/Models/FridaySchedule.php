@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class FridaySchedule extends Model
@@ -17,5 +18,9 @@ class FridaySchedule extends Model
             'schedule_id',     
             'class_id' 
         )->withPivot('id')->withTimestamps();
+    }
+
+    public function teachers(): BelongsTo{
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 }
