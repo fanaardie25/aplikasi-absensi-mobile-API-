@@ -8,6 +8,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -16,6 +20,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -72,10 +77,13 @@ class UsersTable
                 ->trueLabel('Hanya Aktif')
                 ->falseLabel('Sudah Lulus/Non-Aktif')
                 ->native(false),
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make()
+                DeleteAction::make(),
+                ForceDeleteAction::make(),
+                RestoreAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -135,6 +143,8 @@ class UsersTable
                         ->modalDescription('Semua siswa yang dipilih akan dimasukkan ke kelas yang Anda tentukan.')
                         ->modalSubmitActionLabel('Pindahkan Sekarang'),
                 ]),
+                ForceDeleteBulkAction::make(),
+                RestoreBulkAction::make(),
             ]);
     }
 }
