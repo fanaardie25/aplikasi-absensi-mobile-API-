@@ -32,6 +32,7 @@ class UsersTable
         return $table
             ->searchable()
             ->persistSearchInSession()
+            ->deselectAllRecordsWhenFiltered(false)
             ->columns([
                 ImageColumn::make('profile_photo_path')
                     ->disk('public')

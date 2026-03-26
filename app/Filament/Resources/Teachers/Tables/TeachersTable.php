@@ -29,6 +29,8 @@ class TeachersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->persistSearchInSession()
+            ->deselectAllRecordsWhenFiltered(false)
             ->columns([
                 TextColumn::make('name')
                 ->label('Nama Guru')
