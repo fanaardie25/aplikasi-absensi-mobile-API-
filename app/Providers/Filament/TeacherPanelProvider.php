@@ -29,6 +29,7 @@ class TeacherPanelProvider extends PanelProvider
             ->path('teacher')
             ->databaseNotifications()
             ->login()
+            ->profile()
             ->brandLogo(asset('logo.png'))
             ->brandLogoHeight('3rem')
             ->colors([
