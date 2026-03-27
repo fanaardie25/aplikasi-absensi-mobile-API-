@@ -29,6 +29,13 @@ class AttendancesTable
                 ->disk('public')
                 ->label('Bukti Foto')
                 ->circular()
+                ->defaultImageUrl(fn ($record) => "https://ui-avatars.com/api/?name=" . match ($record->status) {
+                    'tidak_hadir' => 'A', 
+                    'izin' => 'I',
+                    'hadir' => 'H',
+                    'sakit' => 'S',
+                    default => '?', 
+                } . "&background=10B981&color=fff")
                 ->extraImgAttributes(['loading' => 'lazy']),
 
             TextColumn::make('student.name')
