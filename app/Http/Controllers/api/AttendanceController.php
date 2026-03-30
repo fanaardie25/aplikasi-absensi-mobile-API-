@@ -83,7 +83,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($now->lt($start)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
+                'message' => "Absen belum dibuka. Silakan kembali pada jam {$startTimeStr}."
             ], 403);
         }
 
