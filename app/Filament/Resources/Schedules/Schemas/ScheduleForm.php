@@ -51,10 +51,9 @@ class ScheduleForm
                     ->relationship('teachers', 'name', function ($query) {
                         return $query->where('role','teacher'); 
                     })
-                    ->label('Pilih Imam')
+                    ->label('Pilih Imam dan khatib')
                     ->preload() 
-                    ->searchable()
-                    ->required() ,
+                    ->searchable(),
             ]);
     }
 }

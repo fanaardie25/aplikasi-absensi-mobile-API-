@@ -22,8 +22,8 @@ class SchedulesTable
                     ->date()
                     ->sortable()
                     ->label('Tanggal'),
-                TextColumn::make('description')->label('Deskripsi'),
-                TextColumn::make('teachers.name')->label('Imam')
+                TextColumn::make('description')->label('Deskripsi')->searchable(),
+                TextColumn::make('teachers.name')->label('Imam dan Khatib')->searchable(),
             ])->defaultSort('id', 'desc')
             ->filters([
                 //
