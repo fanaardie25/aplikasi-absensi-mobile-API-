@@ -82,4 +82,5 @@ Route::group(['prefix' => 'user'], function () {
 //attendance
 Route::group(['prefix' => 'attendance'], function () {
     Route::post('/', [AttendanceController::class, 'store']);
+    Route::post('/permission', [AttendanceController::class, 'storePermission']);
 });

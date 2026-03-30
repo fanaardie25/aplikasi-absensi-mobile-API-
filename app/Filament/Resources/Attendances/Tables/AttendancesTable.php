@@ -10,9 +10,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -64,6 +68,10 @@ class AttendancesTable
                     'tidak_hadir' => 'Alpa',
                 ])
                 ->selectablePlaceholder(false),
+
+            ToggleColumn::make('is_verified')
+                    ->label('Disetujui')
+                    ->sortable(),
 
             TextColumn::make('latitude')
                 ->label('Koordinat')
@@ -129,6 +137,41 @@ class AttendancesTable
                     ->modalSubmitActionLabel('Mulai Ekspor')
             ])
             ->recordActions([
+                Action::make('lihat_bukti')
+                    ->label('Lihat Bukti')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    // Tombol ini HANYA muncul kalau statusnya izin atau sakit
+                    ->visible(fn ($record) => in_array($record->status, ['izin', 'sakit']))
+                    ->modalHeading('Detail Presensi')
+                    ->modalWidth('md')
+                    // Menghilangkan tombol submit karena ini cuma view
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup')
+                    ->schema([
+                        Section::make()
+                            ->schema([
+                                TextEntry::make('status')
+                                    ->badge()
+                                    ->color(fn (string $state): string => match ($state) {
+                                        'sakit' => 'warning',
+                                        'izin' => 'info',
+                                        default => 'gray',
+                                    })
+                                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                                
+                                TextEntry::make('reason')
+                                    ->label('Keterangan / Alasan')
+                                    ->default('Tidak ada keterangan yang dilampirkan.'),
+
+                                ImageEntry::make('photo_path')
+                                    ->label('Bukti')
+                                    ->disk('public')
+                                    ->imageWidth('100%')
+                                    ->imageHeight(400)
+                                    ->extraImgAttributes(['class' => 'rounded-xl object-contain border border-gray-200']),
+                            ])
+                    ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

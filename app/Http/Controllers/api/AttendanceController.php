@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\ScheduleClass;
 use App\Models\Setting;
+use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -16,13 +17,15 @@ use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 
+use function Illuminate\Log\log;
+
 class AttendanceController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {
         return [
             'auth:sanctum',
-            new Middleware('role:admin', except: ['index', 'show','store']),
+            new Middleware('role:admin', except: ['index', 'show','store','storePermission']),
         ];
     }
 
@@ -83,7 +86,7 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($now->lt($start)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Absen belum dibuka. Silakan kembali pada jam 12:00.'
+                'message' => "Absen belum dibuka. Silakan kembali pada jam {$startTimeStr}."
             ], 403);
         }
 
@@ -160,6 +163,7 @@ class AttendanceController extends Controller implements HasMiddleware
                 'latitude'          => $request->latitude,
                 'longtitude'         => $request->longtitude,
                 'photo_path'        => $path,
+                'is_verified'       => true
             ]);
             return response()->json([
                 'success' => true,
@@ -174,6 +178,81 @@ class AttendanceController extends Controller implements HasMiddleware
                 'success' => false,
                 'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
             ], 500);
+        }
+    }
+
+    public function storePermission(Request $request)
+    {
+        $request->validate([
+            'schedule_id' => ['required', 'exists:friday_schedules,id'],
+            'status'      => ['required', 'in:sakit,izin'],
+            'photo'       => ['required', 'image', 'mimes:jpeg,png,jpg'],
+            'reason'      => ['required', 'string', 'max:255'],
+        ]);
+
+        $user = Auth::user();
+        $now = now();
+
+        $rolling = DB::table('schedule_classes')
+            ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
+            ->where('schedule_id', $request->schedule_id)
+            ->where('class_id', $user->class_id)
+            ->where('school_classes.is_active', 1)
+            ->select('schedule_classes.*')
+            ->first();
+
+        if (!$rolling) {
+            return response()->json(['success' => false, 'message' => 'Kelas tidak terdaftar atau nonaktif.'], 403);
+        }
+
+        $alreadyAttended = Attendance::where('student_id', $user->id)
+            ->whereDate('created_at', $now->toDateString())
+            ->exists();
+
+        if ($alreadyAttended) {
+            return response()->json(['success' => false, 'message' => 'Anda sudah melakukan presensi hari ini.'], 422);
+        }
+
+        $path = null;
+
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            
+            $imageName = time() . '_perm_' . $user->id . '.jpg';
+            
+            $image = Image::read($file);
+
+            $image->scaleDown(width: 1200);
+            $encoded = $image->toJpeg(85); 
+            
+            Storage::disk('public')->put('attendances/' . $imageName, (string) $encoded);
+            $path = 'attendances/' . $imageName;
+        }
+
+        try {
+            $attendance = Attendance::create([
+                'student_id'        => $user->id,
+                'schedule_class_id' => $rolling->id, 
+                'status'            => $request->status,
+                'photo_path'        => $path,
+                'reason'            => $request->reason,
+                'latitude'          => 0,
+                'longtitude'        => 0,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Laporan " . ucfirst($request->status) . " berhasil dikirim.",
+            ], 200);
+
+        } catch (\Exception $e) {
+           FacadesLog::error("Presensi Error: " . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'user_id' => Auth::id()
+            ]);
+            if ($path) Storage::disk('public')->delete($path);
+            return response()->json(['success' => false, 'message' => 'Gagal menyimpan data izin.'], 500);
         }
     }
 
