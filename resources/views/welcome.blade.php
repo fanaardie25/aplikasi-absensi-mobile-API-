@@ -95,7 +95,7 @@
                         </svg>
                     </div>
                     <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-3 transition-colors duration-300">Guru Pembimbing</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors duration-300">Verifikasi kehadiran siswa di lapangan, pantau grafik per kelas, dan kelola absensi harian.</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 transition-colors duration-300">Monitoring kehadiran siswa, pantau grafik, dan kelola absensi harian.</p>
                     <div class="inline-flex items-center text-sm font-bold text-emerald-600 dark:text-emerald-400 group-hover:gap-2 transition-all">
                         Mulai Monitoring <span class="ml-1">→</span>
                     </div>
