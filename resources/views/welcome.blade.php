@@ -63,7 +63,7 @@
     <main class="z-10 px-4 py-6 flex-grow flex flex-col items-center justify-center">
         <div class="text-center mb-12">
             <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 transition-colors duration-300">
-                Sistem Presensi <span class="text-emerald-600 dark:text-emerald-400 italic">Jumat.</span>
+                Sistem Presensi <span class="text-emerald-600 dark:text-emerald-400 italic">Keagamaan.</span>
             </h1>
             <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg max-w-xl mx-auto leading-relaxed transition-colors duration-300">
                 Platform monitoring kehadiran siswa dalam kegiatan keagamaan untuk mewujudkan karakter religius dan disiplin.
