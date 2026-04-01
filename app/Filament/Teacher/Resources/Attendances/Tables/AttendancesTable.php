@@ -27,7 +27,21 @@ class AttendancesTable
                 ->disk('public')
                 ->label('Bukti Foto')
                 ->circular()
+                 ->defaultImageUrl(fn ($record) => "https://ui-avatars.com/api/?name=" . match ($record->status) {
+                    'tidak_hadir' => 'A', 
+                    'izin' => 'I',
+                    'hadir' => 'H',
+                    'sakit' => 'S',
+                    default => '?', 
+                } . "&background=10B981&color=fff")
                 ->extraImgAttributes(['loading' => 'lazy']),
+
+            TextColumn::make('scheduleClass.fridaySchedule.agenda.name')
+                ->label('Kegiatan / Agenda')
+                ->badge()
+                ->color('info') 
+                ->searchable()
+                ->sortable(),
 
             TextColumn::make('student.name')
                 ->label('Nama Siswa')
@@ -73,6 +87,11 @@ class AttendancesTable
                     'izin' => 'izin',
                     'sakit' => 'sakit'
                 ]),
+                SelectFilter::make('Agenda')
+                    ->label('Filter Kegiatan')
+                    ->relationship('scheduleClass.fridaySchedule.agenda', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('class')
                     ->label('Kelas')
                     ->relationship('class', 'name', function ($query) {

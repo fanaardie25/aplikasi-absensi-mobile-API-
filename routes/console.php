@@ -9,5 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('attendance:generate')
-    ->dailyAt('13.02')      
+    ->everyFiveMinutes()
     ->timezone('Asia/Jakarta');

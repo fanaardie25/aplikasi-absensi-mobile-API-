@@ -38,6 +38,13 @@ class AttendancesTable
                 } . "&background=10B981&color=fff")
                 ->extraImgAttributes(['loading' => 'lazy']),
 
+            TextColumn::make('scheduleClass.fridaySchedule.agenda.name')
+                ->label('Kegiatan / Agenda')
+                ->badge()
+                ->color('info') 
+                ->searchable()
+                ->sortable(),
+
             TextColumn::make('student.name')
                 ->label('Nama Siswa')
                 ->searchable()
@@ -81,6 +88,11 @@ class AttendancesTable
                     'sakit' => 'Sakit',
                     'tidak_hadir' => 'Alpa',
                 ]),
+                SelectFilter::make('Agenda')
+                    ->label('Filter Kegiatan')
+                    ->relationship('scheduleClass.fridaySchedule.agenda', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('Kelas')
                 ->relationship('class','name'),
                 Filter::make('created_at')

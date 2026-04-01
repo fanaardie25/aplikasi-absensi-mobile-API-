@@ -14,12 +14,13 @@ class CreateDailyAttendance extends Command
      * @var string
      */
     protected $signature = 'attendance:generate';
+
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate otomatis baris absensi siswa berdasarkan jadwal Jumat';
+    protected $description = 'Generate otomatis baris absensi siswa (alpa) berdasarkan jadwal hari ini';
 
     /**
      * Execute the console command.
@@ -28,8 +29,10 @@ class CreateDailyAttendance extends Command
     {
         $today = now();
         $dayName = $today->translatedFormat('l');
+        $currentTime = $today->format('H:i:s');
 
-        $activeSchedules = FridaySchedule::with('classes')
+        // Load relasi 'agenda' dan 'classes.students' sekaligus untuk mencegah N+1 Query Problem
+        $activeSchedules = FridaySchedule::with(['agenda', 'classes.students'])
             ->whereDate('date', $today->toDateString())
             ->get();
 
@@ -38,33 +41,53 @@ class CreateDailyAttendance extends Command
             return;
         }
 
+        $newAttendances = []; 
+        $createdAt = $today->toDateTimeString();
+
         foreach ($activeSchedules as $schedule) {
+            
+            if ($schedule->agenda && $currentTime < $schedule->agenda->end_absensi) {
+                $this->info("Agenda {$schedule->agenda->nama_agenda} belum ditutup (Batas: {$schedule->agenda->end_absensi}). Di-skip dulu.");
+                continue;
+            }
+
             foreach ($schedule->classes as $class) {
                 $scheduleClassId = $class->pivot->id;
+                
+                $studentIds = $class->students->pluck('id')->toArray();
 
-                $students = $class->students;
+                if (empty($studentIds)) {
+                    continue;
+                }
 
-                foreach ($students as $student) {
-                    $alreadyExists = Attendance::where('student_id', $student->id)
-                        ->where('schedule_class_id', $scheduleClassId)
-                        ->whereDate('created_at', $today->toDateString())
-                        ->exists();
+                $attendedStudentIds = Attendance::where('schedule_class_id', $scheduleClassId)
+                    ->whereIn('student_id', $studentIds)
+                    ->whereDate('created_at', $today->toDateString())
+                    ->pluck('student_id')
+                    ->toArray();
 
-                    if (!$alreadyExists) {
-                        Attendance::create([
-                            'student_id'        => $student->id,
-                            'schedule_class_id' => $scheduleClassId,
-                            'photo_path'        => "null",
-                            'status'            => 'tidak_hadir',
-                            'longtitude'        => 0,
-                            'latitude'          => 0,
-                            'created_at'        => $today,
-                        ]);
-                    }
+        
+                $alpaStudentIds = array_diff($studentIds, $attendedStudentIds);
+                foreach ($alpaStudentIds as $studentId) {
+                    $newAttendances[] = [
+                        'student_id'        => $studentId,
+                        'schedule_class_id' => $scheduleClassId,
+                        'photo_path'        => 'null',
+                        'status'            => 'tidak_hadir',
+                        'longtitude'        => '0',
+                        'latitude'          => '0',
+                        'created_at'        => $createdAt,
+                        'updated_at'        => $createdAt, 
+                        'class_id'          => $class->id,
+                    ];
                 }
             }
         }
-
-        $this->info("Berhasil membuat absensi otomatis untuk jadwal hari ini.");
+        if (!empty($newAttendances)) {
+            Attendance::insert($newAttendances);
+            $this->info("Berhasil membuat " . count($newAttendances) . " absensi otomatis (alpa).");
+        } else {
+            $this->info("Aman! Semua siswa sudah absen atau belum waktunya tutup absen.");
+        }
     }
 }

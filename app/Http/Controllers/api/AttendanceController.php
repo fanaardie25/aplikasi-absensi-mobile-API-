@@ -55,46 +55,49 @@ class AttendanceController extends Controller implements HasMiddleware
     }
     public function store(Request $request)
     {
-            $settings = Setting::whereIn('key', [
+        // 1. Ambil setting lokasi & radius saja
+        $settings = Setting::whereIn('key', [
             'school_latitude', 
             'school_longitude', 
-            'attendance_radius',
-            'start_time',
-            'end_time'
+            'attendance_radius'
         ])->pluck('value', 'key');
 
+        // 2. Validasi input (kembali pakai schedule_id yang merujuk ke master jadwal)
         $request->validate([
             'schedule_id' => ['required', 'exists:friday_schedules,id'],
             'latitude'    => ['required', 'string'],
-            'longtitude'   => ['required', 'string'],
+            'longtitude'  => ['required', 'string'],
             'photo'       => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], 
         ]);
 
         $user = Auth::user();
         $now = now(); 
         
-        // --- LOGIKA PEMBATASAN WAKTU ---
-        $startTimeStr = $settings->get('start_time', '12:00');
-        $endTimeStr = $settings->get('end_time', '13:00');
+        // 3. Ambil master jadwal yang dipilih
+        $schedule = \App\Models\FridaySchedule::find($request->schedule_id);
 
-        $start = now()->setTimeFromTimeString($startTimeStr);
-        $end = now()->setTimeFromTimeString($endTimeStr);
+        // --- LOGIKA PEMBATASAN WAKTU DARI TABEL JADWAL ---
+        $start = now()->setTimeFromTimeString($schedule->agenda->start_absensi);
+        $end = now()->setTimeFromTimeString($schedule->agenda->end_absensi);
 
         if ($now->lt($start)) {
+            $jamBuka = \Carbon\Carbon::parse($schedule->agenda->start_absensi)->format('H:i');
             return response()->json([
                 'success' => false,
-                'message' => "Absen belum dibuka. Silakan kembali pada jam {$startTimeStr}."
+                'message' => "Absen belum dibuka. Silakan kembali pada jam {$jamBuka}."
             ], 403);
         }
 
         if ($now->gt($end)) {
+            $jamTutup = \Carbon\Carbon::parse($schedule->agenda->end_absensi)->format('H:i');
             return response()->json([
                 'success' => false,
-                'message' => "Waktu absen sudah habis (Batas jam {$endTimeStr})."
+                'message' => "Waktu absen sudah habis (Batas jam {$jamTutup})."
             ], 403);
         }
-        // -------------------------------
+        // -----------------------------------------------
     
+        // 4. LOGIKA PEMBATASAN KELAS
         $rolling = DB::table('schedule_classes')
             ->join('school_classes', 'schedule_classes.class_id', '=', 'school_classes.id') 
             ->where('schedule_id', $request->schedule_id)
@@ -103,16 +106,15 @@ class AttendanceController extends Controller implements HasMiddleware
             ->select('schedule_classes.*')
             ->first();
 
-
         if (!$rolling) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kelas tidak terdaftar atau sudah tidak aktif.'
+                'message' => 'Kelas kamu tidak terdaftar untuk mengikuti agenda ini.'
             ], 403);
         }
-
   
-        $alreadyAttended = Attendance::where('student_id', $user->id)
+        // 5. Cek Duplikasi Absen di Tabel ATTENDANCES
+        $alreadyAttended = \App\Models\Attendance::where('student_id', $user->id)
             ->where('schedule_class_id', $rolling->id)
             ->whereDate('created_at', $now->toDateString())
             ->exists();
@@ -120,10 +122,11 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($alreadyAttended) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kamu Sudah Absen Hari ini'
+                'message' => 'Kamu sudah absen untuk jadwal ini hari ini.'
             ], 422);
         }
     
+        // 6. Validasi Radius Jarak
         $schoolLat = $settings->get('school_latitude', -7.390022513649234);
         $schoolLong = $settings->get('school_longitude', 110.51808635390792);
         $radius = (int) $settings->get('attendance_radius', 100);
@@ -133,11 +136,11 @@ class AttendanceController extends Controller implements HasMiddleware
         if ($distance > $radius) {
             return response()->json([
                 'success' => false,
-                'message' => 'You are outside the school radius. Distance: ' . round($distance) . 'm.'
+                'message' => 'Kamu berada di luar radius sekolah. Jarak: ' . round($distance) . 'm.'
             ], 403);
         }
 
-     
+        // 7. Proses Foto
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
             $imageName = time() . '_' . $user->id . '.webp'; 
@@ -147,32 +150,32 @@ class AttendanceController extends Controller implements HasMiddleware
             $encoded = $image->toWebp(65);
             
             Storage::disk('public')->put('attendances/' . $imageName, (string) $encoded);
-
             $path = 'attendances/' . $imageName;
         }
 
-       
+        // 8. Simpan Data Absensi ke Tabel ATTENDANCES
         try {
-            $attendance = Attendance::create([
+            $attendance = \App\Models\Attendance::create([
                 'student_id'        => $user->id,
                 'schedule_class_id' => $rolling->id, 
                 'status'            => 'hadir',
                 'latitude'          => $request->latitude,
-                'longtitude'         => $request->longtitude,
+                'longtitude'        => $request->longtitude,
                 'photo_path'        => $path,
             ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Attendance recorded successfully!',
+                'message' => 'Berhasil melakukan absensi!',
                 'data'    => $attendance
             ], 200);
 
         } catch (\Exception $e) {
-            Storage::disk('public')->delete($path);
+            if (isset($path)) Storage::disk('public')->delete($path);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat menyimpan data.'
+                'message' => 'Terjadi kesalahan sistem saat menyimpan data: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class ScheduleResource extends Resource
@@ -39,6 +40,12 @@ class ScheduleResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return ScheduleInfolist::configure($schema);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+                        ->with('agenda','classes');
     }
 
     public static function table(Table $table): Table
