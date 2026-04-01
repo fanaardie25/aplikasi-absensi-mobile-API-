@@ -58,18 +58,7 @@ class ManageSettings extends Page
                             ->numeric()
                             ->suffix('meter')
                             ->required(),
-                    ])->columns(1),
-
-                ComponentsSection::make('Waktu Operasional')
-                    ->description('Atur jam berapa siswa mulai bisa absen.')
-                    ->schema([
-                        TimePicker::make('start_time')
-                            ->label('Jam Buka Absen')
-                            ->required(),
-                        TimePicker::make('end_time')
-                            ->label('Jam Tutup / Alpha Otomatis')
-                            ->required(),
-                    ])->columns(1),
+                    ])->columns(1)->columnSpanFull(),
 
                 ComponentsSection::make('General Settings')
                 ->description('Pengaturan dasar website dan aplikasi.')

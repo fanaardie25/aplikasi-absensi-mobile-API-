@@ -33,14 +33,5 @@ class SettingSeeder extends Seeder
             'value' => '12:00:00',
         ]);
         
-        Setting::create([
-            'key' => 'end_time',
-            'value' => '13:00:00',
-        ]);
-
-        Setting::create([
-            'key' => 'site_name',
-            'value' => 'SAKTI',
-        ]);
     }
 }
