@@ -29,6 +29,9 @@ class KehadiranExporter extends Exporter
                     return asset('storage/' . $state);
                 }),
 
+            ExportColumn::make('scheduleClass.fridaySchedule.agenda.name')
+                ->label('Kegiatan / Agenda'),
+
             ExportColumn::make('student.name')
                 ->label('Nama Siswa'),
 

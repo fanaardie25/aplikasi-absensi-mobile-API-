@@ -23,18 +23,35 @@ Route::get('/me', function (Request $request) {
     
     $todayDate = now()->format('Y-m-d');
 
-    $userSchedule = ScheduleClass::where('class_id', $user->class_id)
+    $todaySchedules = ScheduleClass::with('fridaySchedule.agenda')
+        ->where('class_id', $user->class_id)
         ->whereHas('fridaySchedule', function ($query) use ($todayDate) {
             $query->whereDate('date', $todayDate);
         })
-        ->first();
+        ->get()
+        ->sortBy(function ($scheduleClass) {
+            return $scheduleClass->fridaySchedule->agenda->start_absensi ?? '00:00:00';
+        });
+
+    $userSchedule = null;
+    $attendanceToday = null;
+
+    foreach ($todaySchedules as $schedule) {
+        $absen = Attendance::where('student_id', $user->id)
+            ->where('schedule_class_id', $schedule->id) 
+            ->whereDate('created_at', $todayDate)
+            ->first();
+
+        $userSchedule = $schedule; 
+        if (!$absen) {
+            $attendanceToday = null;
+            break; 
+        } else {
+            $attendanceToday = $absen;
+        }
+    }
 
     $hasScheduleToday = !is_null($userSchedule);
-
-    $attendanceToday = Attendance::where('student_id', $user->id)
-        ->whereDate('created_at', $todayDate)
-        ->first();
-
 
     return response()->json([
         'id'                 => $user->id,  
@@ -44,8 +61,11 @@ Route::get('/me', function (Request $request) {
         'nis'                => $user->nis,  
         'class_id'           => $user->class_id ?? null,
         'profile_photo_path' => $user->profile_photo_path ?? '',
-        'schedule_id'       =>  $userSchedule->schedule_id ?? null,
+        'schedule_id'       =>  $userSchedule?->schedule_id ?? null,
         
+        'agenda_name'        => $userSchedule?->fridaySchedule?->agenda?->name ?? null,
+        'start_absensi' => $userSchedule?->fridaySchedule?->agenda?->start_absensi ?? null,
+        'end_absensi'   => $userSchedule?->fridaySchedule?->agenda?->end_absensi ?? null,
 
         'school_class' => $user->schoolClass ? [
             'id'       => $user->schoolClass->id,
@@ -55,7 +75,7 @@ Route::get('/me', function (Request $request) {
             'sequence' => $user->schoolClass->sequence,
         ] : null,
 
-        'teacher' => $user->schoolClass->teacher->name ?? null,
+        'teacher' => $user->schoolClass?->teacher?->name ?? null,
 
         'is_schedule_open'   => $hasScheduleToday,
         'is_absent_today'    => !is_null($attendanceToday),

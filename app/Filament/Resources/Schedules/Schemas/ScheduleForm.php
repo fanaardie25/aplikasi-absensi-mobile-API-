@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Schedules\Schemas;
 
+use App\Models\Agenda;
 use Carbon\Carbon;
 use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -18,42 +20,32 @@ class ScheduleForm
     {
         return $schema
             ->components([
-               DatePicker::make('date')
-                ->label('Tanggal Jadwal Jumat')
-                ->format('Y/m/d')
-                ->native(false)
-                ->displayFormat('d/m/Y') 
-                ->required()
-                
-                ->unique('friday_schedules', 'date', ignoreRecord: true)
-                
-                ->afterOrEqual(today()) 
-                
-                ->rules([
-                    fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                        $date = Carbon::parse($value);
-                        if ($date->dayOfWeek !== Carbon::FRIDAY) {
-                            $fail('Pembuatan     jadwal gagal. Tanggal yang dipilih harus jatuh pada hari Jumat.');
-                        }
-                    },
-                ])
-                
-                ->closeOnDateSelection(),
-                TextInput::make('description'),
+              Select::make('agenda_id')
+                    ->label('Pilih Agenda / Kegiatan')
+                    ->options(Agenda::where('is_active', true)->pluck('name', 'id'))
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+
+                DatePicker::make('date')
+                    ->label('Tanggal Kegiatan')
+                    ->default(now())
+                    ->format('Y/m/d')
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->required()
+                    ->closeOnDateSelection(),
+
                 Select::make('classes')
-                ->label('Pilih Kelas')
-                ->multiple() 
-                ->relationship('classes', 'name')
-                ->preload() 
-                ->searchable()
-                ->required(),
-                Select::make('teacher_id') 
-                    ->relationship('teachers', 'name', function ($query) {
-                        return $query->where('role','teacher'); 
-                    })
-                    ->label('Pilih Imam dan khatib')
+                    ->label('Pilih Kelas')
+                    ->multiple() 
+                    ->relationship('classes', 'name')
                     ->preload() 
-                    ->searchable(),
+                    ->searchable()
+                    ->required(),
+
+                Textarea::make('description')
+                    ->label('Keterangan Tambahan'),
             ]);
     }
 }

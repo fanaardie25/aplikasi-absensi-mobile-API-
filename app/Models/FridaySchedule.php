@@ -20,7 +20,8 @@ class FridaySchedule extends Model
         )->withPivot('id')->withTimestamps();
     }
 
-    public function teachers(): BelongsTo{
-        return $this->belongsTo(User::class, 'teacher_id');
+    public function agenda(): BelongsTo
+    {
+        return $this->belongsTo(Agenda::class, 'agenda_id');
     }
 }

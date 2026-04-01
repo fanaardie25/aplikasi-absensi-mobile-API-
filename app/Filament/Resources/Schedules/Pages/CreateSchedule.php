@@ -27,8 +27,8 @@ class CreateSchedule extends CreateRecord
 
             $this->sendNotificationToTopic(
                 $topicName, 
-                "Jadwal Jumat Baru! 📅", 
-                "Kamu mendapatkan giliran untuk tanggal " . $formattedDate . ". Jangan lupa hadir dan absen yaa!"
+                "Jadwal Kegiatan Baru 📅", 
+                "Jadwal kegiatan untuk tanggal {$formattedDate} sudah tersedia. Pastikan kamu hadir dan mengisi presensi tepat waktu ya!"
             );
         }
     }

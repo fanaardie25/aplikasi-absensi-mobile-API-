@@ -152,15 +152,20 @@ class UserController extends Controller implements HasMiddleware
     public function getAllActivity()
     {
         $user = FacadesAuth::user();
+        
         $activity = Attendance::select([
-                'id', 
-                'status', 
-                'photo_path',
-                DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
+                'attendances.id', 
+                'attendances.status', 
+                'attendances.photo_path',
+                DB::raw("DATE_FORMAT(attendances.created_at, '%d-%m-%Y %H:%i') as date"),
+                'agendas.name' 
             ])
-            ->where('student_id', $user->id)
-            ->where('status', 'hadir')
-            ->latest()
+            ->join('schedule_classes', 'attendances.schedule_class_id', '=', 'schedule_classes.id')
+            ->join('friday_schedules', 'schedule_classes.schedule_id', '=', 'friday_schedules.id')
+            ->join('agendas', 'friday_schedules.agenda_id', '=', 'agendas.id')
+            ->where('attendances.student_id', $user->id)
+            ->where('attendances.status', 'hadir')
+            ->latest('attendances.created_at')
             ->get();
 
         return response()->json([

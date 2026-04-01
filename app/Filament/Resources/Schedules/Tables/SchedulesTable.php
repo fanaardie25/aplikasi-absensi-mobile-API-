@@ -16,15 +16,35 @@ class SchedulesTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable(),
                 TextColumn::make('date')
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable()
-                    ->label('Tanggal'),
-                TextColumn::make('description')->label('Deskripsi')->searchable(),
-                TextColumn::make('teachers.name')->label('Imam dan Khatib')->searchable(),
-            ])->defaultSort('id', 'desc')
+                    ->label('Tanggal Kegiatan'),
+
+                TextColumn::make('agenda.name')
+                    ->label('Agenda / Kegiatan')
+                    ->badge()
+                    ->color('primary')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('classes.name')
+                    ->label('Kelas')
+                    ->badge()
+                    ->searchable(),
+
+                TextColumn::make('agenda.teacher.name')
+                    ->label('Imam / Pengawas')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true), 
+
+                TextColumn::make('description')
+                    ->label('Keterangan')
+                    ->limit(30) 
+                    ->searchable(),
+            ])
+           
+            ->defaultSort('date', 'desc') 
             ->filters([
                 //
             ])
