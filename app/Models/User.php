@@ -33,7 +33,8 @@ class User extends Authenticatable implements FilamentUser
         'class_id',
         'profile_photo_path',
         'nip',
-        'is_active'
+        'is_active',
+        'must_change_password'
     ];
 
     /**

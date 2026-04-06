@@ -8,7 +8,9 @@ use App\Http\Controllers\api\UserController;
 use App\Models\Attendance;
 use App\Models\ScheduleClass;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 Route::get('/me', function (Request $request) {
     $user = $request->user()->load(['schoolClass.teacher'])
@@ -57,6 +59,7 @@ Route::get('/me', function (Request $request) {
         'id'                 => $user->id,  
         'name'               => $user->name,
         'email'              => $user->email,
+        'must_change_password' => (bool) $user->must_change_password,
         'role'               => $user->role, 
         'nis'                => $user->nis,  
         'class_id'           => $user->class_id ?? null,
@@ -90,6 +93,34 @@ Route::get('/me', function (Request $request) {
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('/change-password', function (Request $request) {
+        $validator = Validator::make($request->all(), [
+            'old_password' => ['required', 'current_password'],
+            'new_password' => ['required', 'confirmed', 'min:8'],
+        ], [
+            'old_password.current_password' => 'Password lama kamu salah!',
+            'new_password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'new_password.min' => 'Password minimal 8 karakter!',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first() 
+            ], 422); 
+        }
+
+        $user = $request->user();
+        $user->update([
+            'password' => Hash::make($request->new_password), 
+            'must_change_password' => 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diperbarui!'
+        ]);
+    })->middleware('auth:sanctum');
 });
 
 //user
