@@ -138,7 +138,6 @@ class UserController extends Controller implements HasMiddleware
                 DB::raw("DATE_FORMAT(created_at, '%d-%m-%Y %H:%i') as date")
             ])
             ->where('student_id', $user->id)
-            ->where('status', 'hadir')
             ->latest()
             ->limit(5)
             ->get();
@@ -164,7 +163,6 @@ class UserController extends Controller implements HasMiddleware
             ->join('friday_schedules', 'schedule_classes.schedule_id', '=', 'friday_schedules.id')
             ->join('agendas', 'friday_schedules.agenda_id', '=', 'agendas.id')
             ->where('attendances.student_id', $user->id)
-            ->where('attendances.status', 'hadir')
             ->latest('attendances.created_at')
             ->get();
 
