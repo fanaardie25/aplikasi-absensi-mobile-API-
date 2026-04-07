@@ -94,10 +94,15 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('/change-password', function (Request $request) {
+        $userId = $request->user()->id;
         $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email', 'unique:users,email,' . $userId],
             'old_password' => ['required', 'current_password'],
             'new_password' => ['required', 'confirmed', 'min:8'],
         ], [
+            'email.unique' => 'Email sudah digunakan oleh siswa lain!',
+            'email.required' => 'Email wajib diisi!',
+            'email.email' => 'Format email tidak valid!',
             'old_password.current_password' => 'Password lama kamu salah!',
             'new_password.confirmed' => 'Konfirmasi password baru tidak cocok.',
             'new_password.min' => 'Password minimal 8 karakter!',
@@ -113,12 +118,13 @@ Route::group(['prefix' => 'auth'], function () {
         $user = $request->user();
         $user->update([
             'password' => Hash::make($request->new_password), 
+            'email' => $request->email,
             'must_change_password' => 0,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Password berhasil diperbarui!'
+            'message' => 'Email dan Password berhasil diperbarui!'
         ]);
     })->middleware('auth:sanctum');
 });

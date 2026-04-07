@@ -3,54 +3,55 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $request->validate([
+            'login' => ['required', 'string'],
             'password' => ['required'],
+        ], [
+            'login.required' => 'NIS atau Email wajib diisi',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        // 2. CARI USER BERDASARKAN EMAIL ATAU NIS
+        $user = User::where('email', $request->login)
+                    ->orWhere('nis', $request->login)
+                    ->first();
 
-            // 1. CEK STATUS AKTIF
-            if ($user->is_active !== true) {
-                Auth::logout();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akun Anda sudah tidak aktif'
-                ], 403);
-            }
-
-            // 2. CEK APAKAH SUDAH DI-PLOTTING KE KELAS
-            if (is_null($user->class_id)) {
-                Auth::logout();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akun Anda belum terdaftar di kelas manapun. Hubungi Admin'
-                ], 403);
-            }
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
-                'success' => true,
-                'access_token' => $token,
-                'data' => $user
-            ]);
+                'success' => false,
+                'message' => 'NIS/Email atau password salah.'
+            ], 401);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Email atau password salah.'
-        ], 401);
-    }
+        if (! $user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda sudah tidak aktif. Hubungi Admin.'
+            ], 403);
+        }
 
+        if (is_null($user->class_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda belum terdaftar di kelas manapun. Hubungi Admin.'
+            ], 403);
+        }
+        $token = $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'success' => true,
+            'message' => 'Login berhasil!',
+            'access_token' => $token,
+            'data' => $user 
+        ]);
+    }
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
