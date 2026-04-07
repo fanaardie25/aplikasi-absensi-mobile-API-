@@ -23,8 +23,7 @@ class SiswaImporter extends Importer
 
             ImportColumn::make('email')
                 ->label('Email')
-                ->requiredMapping()
-                ->rules(['required', 'email', 'max:255']),
+                ->rules(['nullable', 'email', 'max:255']),
 
             ImportColumn::make('nis')
                 ->label('NIS')
@@ -35,7 +34,6 @@ class SiswaImporter extends Importer
 
     public function resolveRecord(): User
     {
-
         return User::firstOrNew([
             'nis' => $this->data['nis'],
         ]);
@@ -46,8 +44,13 @@ class SiswaImporter extends Importer
         $this->record->role = 'student';
         $this->record->is_active = true;
 
+        if (blank($this->record->email)) {
+            $this->record->email = $this->record->nis . '@satamail.my.id';
+        }
+
         if (! $this->record->exists) {
-            $this->record->password = Hash::make($this->data['nis']);
+            $this->record->password = Hash::make($this->record->nis);
+            $this->record->must_change_password = 1;
         }
     }
 
