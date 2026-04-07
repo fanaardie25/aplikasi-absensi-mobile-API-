@@ -54,6 +54,11 @@ class SiswaImporter extends Importer
         }
     }
 
+    public static function getJobChunkSize(): int
+    {
+        return 10;
+    }
+
     public static function getCompletedNotificationBody(Import $import): string
     {
         $body = 'Import siswa selesai. ' . Number::format($import->successful_rows) . ' data berhasil diimpor.';
