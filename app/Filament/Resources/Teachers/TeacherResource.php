@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
 class TeacherResource extends Resource
@@ -40,7 +41,10 @@ class TeacherResource extends Resource
     {
         return parent::getEloquentQuery()
         ->with('supervisedClasses', 'supervisedClasses.academicYear')
-        ->where('role', 'teacher');
+        ->where('role', 'teacher')
+        ->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
     }
 
     public static function infolist(Schema $schema): Schema
