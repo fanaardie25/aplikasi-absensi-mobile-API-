@@ -35,7 +35,10 @@ class ListUsers extends ListRecords
                 ->label('Import Siswa')
                 ->importer(SiswaImporter::class)
                 ->color('info')
-                ->icon('heroicon-o-user-group'),
+                ->icon('heroicon-o-user-group')
+                ->after(function () {
+                    return redirect(request()->header('Referer'));
+                }),
         ];
     }
 }

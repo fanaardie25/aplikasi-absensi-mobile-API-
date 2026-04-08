@@ -29,13 +29,16 @@ class ListTeachers extends ListRecords
 
                 return Response::streamDownload(function () use ($csvData) {
                     echo $csvData;
-                }, 'template_siswa.csv');
+                }, 'template_guru.csv');
             }),
             ImportAction::make('importteachers')
                 ->label('Import Guru')
                 ->importer(GuruImporter::class)
                 ->color('info')
-                ->icon('heroicon-o-user-group'),
+                ->icon('heroicon-o-user-group')
+                ->after(function () {
+                    return redirect(request()->header('Referer'));
+                }),
         ];
     }
 }
