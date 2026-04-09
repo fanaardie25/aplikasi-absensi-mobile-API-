@@ -23,9 +23,9 @@ class ListUsers extends ListRecords
             ->icon('heroicon-o-document-arrow-down')
             ->color('gray')
             ->action(function () {
-                $columns = ['name', 'email', 'nis']; 
+                $columns = ['name', 'email', 'nis','gender','religion']; 
                 $csvData = implode(';', $columns) . "\n";
-                $csvData .= "Contoh Nama;contoh@satamail.my.id;p.12345";
+                $csvData .= "Contoh Nama;contoh@satamail.my.id;p.12345;L;Islam";
 
                 return Response::streamDownload(function () use ($csvData) {
                     echo $csvData;

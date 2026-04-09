@@ -25,15 +25,25 @@ Route::get('/me', function (Request $request) {
     
     $todayDate = now()->format('Y-m-d');
 
+    // --- BAGIAN YANG DI-UPDATE (FILTER GENDER & AGAMA) ---
     $todaySchedules = ScheduleClass::with('fridaySchedule.agenda')
         ->where('class_id', $user->class_id)
-        ->whereHas('fridaySchedule', function ($query) use ($todayDate) {
-            $query->whereDate('date', $todayDate);
+        ->whereHas('fridaySchedule', function ($query) use ($todayDate, $user) {
+            $query->whereDate('date', $todayDate)
+                  // Kita tambah pengecekan ke tabel agendas
+                  ->whereHas('agenda', function ($agendaQuery) use ($user) {
+                      $agendaQuery
+                          // 1. Ambil yang targetnya 'ALL' atau sesuai gender santri
+                          ->whereIn('target_gender', ['ALL', $user->gender])
+                          // 2. Ambil yang targetnya 'ALL' atau sesuai agama santri
+                          ->whereIn('target_religion', ['ALL', $user->religion]);
+                  });
         })
         ->get()
         ->sortBy(function ($scheduleClass) {
             return $scheduleClass->fridaySchedule->agenda->start_absensi ?? '00:00:00';
         });
+    // ----------------------------------------------------
 
     $userSchedule = null;
     $attendanceToday = null;
@@ -62,6 +72,8 @@ Route::get('/me', function (Request $request) {
         'must_change_password' => (bool) $user->must_change_password,
         'role'               => $user->role, 
         'nis'                => $user->nis,  
+        'gender'             => $user->gender,
+        'religion'           => $user->religion,
         'class_id'           => $user->class_id ?? null,
         'profile_photo_path' => $user->profile_photo_path ?? '',
         'schedule_id'       =>  $userSchedule?->schedule_id ?? null,

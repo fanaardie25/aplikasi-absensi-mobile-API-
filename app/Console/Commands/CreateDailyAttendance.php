@@ -31,7 +31,6 @@ class CreateDailyAttendance extends Command
         $dayName = $today->translatedFormat('l');
         $currentTime = $today->format('H:i:s');
 
-        // Load relasi 'agenda' dan 'classes.students' sekaligus untuk mencegah N+1 Query Problem
         $activeSchedules = FridaySchedule::with(['agenda', 'classes.students'])
             ->whereDate('date', $today->toDateString())
             ->get();
@@ -47,14 +46,27 @@ class CreateDailyAttendance extends Command
         foreach ($activeSchedules as $schedule) {
             
             if ($schedule->agenda && $currentTime < $schedule->agenda->end_absensi) {
-                $this->info("Agenda {$schedule->agenda->nama_agenda} belum ditutup (Batas: {$schedule->agenda->end_absensi}). Di-skip dulu.");
+                $this->info("Agenda {$schedule->agenda->name} belum ditutup (Batas: {$schedule->agenda->end_absensi}). Di-skip dulu.");
                 continue;
             }
+
+            $targetGender = $schedule->agenda->target_gender ?? 'ALL';
+            $targetReligion = $schedule->agenda->target_religion ?? 'ALL';
 
             foreach ($schedule->classes as $class) {
                 $scheduleClassId = $class->pivot->id;
                 
-                $studentIds = $class->students->pluck('id')->toArray();
+                // Saring data siswa di memori sebelum dibikin array ID-nya
+                $filteredStudents = $class->students->filter(function ($student) use ($targetGender, $targetReligion) {
+                    $matchGender = ($targetGender === 'ALL') || ($student->gender === $targetGender);
+                    $matchReligion = ($targetReligion === 'ALL') || ($student->religion === $targetReligion);
+                    
+                    return $matchGender && $matchReligion;
+                });
+
+                // Cuma ambil ID siswa yang lolos filter Gender & Agama
+                $studentIds = $filteredStudents->pluck('id')->toArray();
+
 
                 if (empty($studentIds)) {
                     continue;
@@ -68,11 +80,12 @@ class CreateDailyAttendance extends Command
 
         
                 $alpaStudentIds = array_diff($studentIds, $attendedStudentIds);
+                
                 foreach ($alpaStudentIds as $studentId) {
                     $newAttendances[] = [
                         'student_id'        => $studentId,
                         'schedule_class_id' => $scheduleClassId,
-                        'photo_path'        => 'null',
+                        'photo_path'        => "", 
                         'status'            => 'tidak_hadir',
                         'longtitude'        => '0',
                         'latitude'          => '0',
@@ -83,6 +96,7 @@ class CreateDailyAttendance extends Command
                 }
             }
         }
+        
         if (!empty($newAttendances)) {
             Attendance::insert($newAttendances);
             $this->info("Berhasil membuat " . count($newAttendances) . " absensi otomatis (alpa).");

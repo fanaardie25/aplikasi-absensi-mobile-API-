@@ -38,6 +38,22 @@ class TeachersTable
                 TextColumn::make('nip')
                     ->label('NIP')
                     ->searchable(),
+                                    TextColumn::make('gender')
+                    ->label('Jenis Kelamin')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'L' => 'L',
+                        'P' => 'P',
+                        default => 'Tidak Diketahui',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'L' => 'info', 
+                        'P' => 'danger',  
+                        default => 'gray',
+                    }),
+                TextColumn::make('religion')
+                    ->label('Agama')
+                    ->searchable(),
                 TextColumn::make('email')
                     ->searchable(),
                 IconColumn::make('is_active')

@@ -38,6 +38,17 @@ class KehadiranExporter extends Exporter
             ExportColumn::make('student.nis')
                 ->label('NIS'),
 
+            ExportColumn::make('student.gender')
+                ->label('Jenis Kelamin')
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'L' => 'L',
+                    'P' => 'P',
+                    default => 'Tidak Diketahui',
+                }),
+
+            ExportColumn::make('student.religion')
+                ->label('Agama'),
+
             ExportColumn::make('student.schoolClass.name')
                 ->label('Kelas'),
 

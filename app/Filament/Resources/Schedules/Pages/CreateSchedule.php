@@ -17,22 +17,45 @@ class CreateSchedule extends CreateRecord
     {
         $schedule = $this->record;
         
+        // 1. Ambil target dari agenda & bersihkan formatnya (lowercase & tanpa spasi)
+        // Kita pakai default 'all' kalau misalnya datanya kosong
+        $targetGender = strtolower(str_replace(' ', '_', $schedule->agenda->target_gender ?? 'all'));
+        $targetReligion = strtolower(str_replace(' ', '_', $schedule->agenda->target_religion ?? 'all'));
+        $agendaName = $schedule->agenda->name ?? 'Kegiatan';
 
         $classes = $schedule->classes; 
 
         foreach ($classes as $class) {
-            $topicName = "class_" . $class->id; 
+            $classId = strtolower(str_replace(' ', '_', $class->id));
+
+            // PENENTUAN TOPIC TEPAT SASARAN
+            if ($targetGender === 'all' && $targetReligion === 'all') {
+                // Level 1: Semua anak
+                $topicName = "class_" . $classId; 
+                
+            } elseif ($targetGender !== 'all' && $targetReligion === 'all') {
+                // Level 2: Spesifik Gender saja
+                $topicName = "class_" . $classId . "_" . $targetGender;
+                
+            } elseif ($targetGender === 'all' && $targetReligion !== 'all') {
+                // Level 3: Spesifik Agama saja 
+                $topicName = "class_" . $classId . "_" . $targetReligion;
+                
+            } else {
+                // Level 4: Spesifik Gender & Agama
+                $topicName = "class_" . $classId . "_" . $targetGender . "_" . $targetReligion;
+            }
 
             $formattedDate = \Carbon\Carbon::parse($schedule->date)->format('d/m/Y');
-
             $this->sendNotificationToTopic(
                 $topicName, 
-                "Jadwal Kegiatan Baru 📅", 
-                "Jadwal kegiatan untuk tanggal {$formattedDate} sudah tersedia. Pastikan kamu hadir dan mengisi presensi tepat waktu ya!"
+                "Jadwal $agendaName Baru 📅", 
+                "Jadwal untuk tanggal {$formattedDate} sudah tersedia. Pastikan kamu hadir dan mengisi presensi ya!"
             );
         }
     }
-     /**
+
+    /**
      * Fungsi untuk mendapatkan Access Token dari Firebase
      */
     private function getGoogleAccessToken()
@@ -40,7 +63,7 @@ class CreateSchedule extends CreateRecord
         $file = storage_path('app/firebase_credential.json'); 
         
         if (!file_exists($file)) {
-            throw new \Exception("File firebase_credentials.json tidak ditemukan di storage/app/");
+            throw new \Exception("File firebase_credential.json tidak ditemukan di storage/app/");
         }
 
         $scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
@@ -64,31 +87,34 @@ class CreateSchedule extends CreateRecord
             $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
 
             $response = Http::withToken($accessToken)->post($url, [
-            'message' => [
-                'topic' => $topic,
-                'notification' => [
-                    'title' => $title,
-                    'body' => $body,
-                ],
-                'data' => [
-                    'type' => 'new_schedule',
-                    // Tambahkan data lain jika perlu
-                ],
-                'android' => [
-                    'priority' => 'high',
+                'message' => [
+                    'topic' => $topic,
                     'notification' => [
-                        'channel_id' => 'absensi_channel', 
-                        'sound' => 'default'
+                        'title' => $title,
+                        'body' => $body,
+                    ],
+                    'data' => [
+                        'type' => 'new_schedule',
+                    ],
+                    'android' => [
+                        'priority' => 'high',
+                        'notification' => [
+                            'channel_id' => 'absensi_channel_v2', 
+                            'sound' => 'default'
+                        ],
                     ],
                 ],
-            ],
-        ]);
+            ]);
 
-        $res = $response->json();
-        if ($response->successful()) {
-            Log::error("FCM Detail: " . json_encode($res));
-        }
-        return $res;
+            $res = $response->json();
+            
+            if ($response->successful()) {
+                Log::info("FCM Sukses kirim ke topic [$topic]: " . json_encode($res));
+            } else {
+                Log::error("FCM Gagal: " . json_encode($res));
+            }
+            
+            return $res;
             
         } catch (\Exception $e) {
             Log::error("FCM Error: " . $e->getMessage());

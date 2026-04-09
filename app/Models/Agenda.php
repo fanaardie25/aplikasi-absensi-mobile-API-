@@ -13,6 +13,8 @@ class Agenda extends Model
         'teacher_id',
         'category',
         'is_active',
+        'target_gender',
+        'target_religion',
     ];
 
     public function teacher()

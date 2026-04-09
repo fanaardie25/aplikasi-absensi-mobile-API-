@@ -49,6 +49,24 @@ class AttendancesTable
                 ->sortable()
                 ->description(fn ($record) => "NIS: {$record->student->nis}"),
 
+            TextColumn::make('student.gender')
+                    ->label('Jenis Kelamin')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'L' => 'L',
+                        'P' => 'P',
+                        default => 'Tidak Diketahui',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'L' => 'info', 
+                        'P' => 'danger',  
+                        default => 'gray',
+                    }),
+
+            TextColumn::make('student.religion')
+                ->label('Agama')
+                ->searchable(),
+
 
             TextColumn::make('class.name')
                 ->label('Kelas')

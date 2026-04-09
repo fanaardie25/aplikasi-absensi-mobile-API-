@@ -23,9 +23,9 @@ class ListTeachers extends ListRecords
             ->icon('heroicon-o-document-arrow-down')
             ->color('gray')
             ->action(function () {
-                $columns = ['name', 'email', 'nip']; 
+                $columns = ['name', 'email', 'nip','gender','religion']; 
                 $csvData = implode(';', $columns) . "\n";
-                $csvData .= "ContohNama;contoh@gmail.com;1324672344";
+                $csvData .= "ContohNama;contoh@gmail.com;1324672344;L;Islam";
 
                 return Response::streamDownload(function () use ($csvData) {
                     echo $csvData;

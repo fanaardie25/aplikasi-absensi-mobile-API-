@@ -29,6 +29,18 @@ class SiswaImporter extends Importer
                 ->label('NIS')
                 ->requiredMapping()
                 ->rules(['required']),
+
+            ImportColumn::make('gender')
+                ->label('Jenis Kelamin')
+                ->requiredMapping()
+                ->rules(['required', 'in:L,P'])
+                ->helperText('L untuk Laki-laki, P untuk Perempuan'),
+
+            ImportColumn::make('religion')
+                ->label('Agama')
+                ->requiredMapping()
+                ->rules(['required', 'in:Islam,Kristen,Katolik,Hindu,Buddha'])
+                ->helperText('Pilih salah satu: Islam, Kristen, Katolik, Hindu, Buddha'),
         ];
     }
 

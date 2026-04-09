@@ -49,6 +49,22 @@ class UsersTable
                 TextColumn::make('nis')
                     ->label('NIS')
                     ->searchable(),
+                TextColumn::make('gender')
+                    ->label('Jenis Kelamin')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'L' => 'L',
+                        'P' => 'P',
+                        default => 'Tidak Diketahui',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'L' => 'info', 
+                        'P' => 'danger',  
+                        default => 'gray',
+                    }),
+                TextColumn::make('religion')
+                    ->label('Agama')
+                    ->searchable(),
                 TextColumn::make('schoolClass.name')
                     ->label('Kelas')
                     ->searchable(),
@@ -72,6 +88,23 @@ class UsersTable
                 SelectFilter::make('class_id')
                     ->relationship('schoolClass', 'name')
                     ->label('Filter per Kelas'),
+                SelectFilter::make('gender')
+                    ->label('Filter Jenis Kelamin')
+                    ->options([
+                        'L' => 'Laki-laki',
+                        'P' => 'Perempuan',
+                    ])
+                    ->placeholder('Semua Jenis Kelamin'),
+                SelectFilter::make('religion')
+                    ->label('Filter Agama')
+                    ->options([
+                        'Islam'   => 'Islam',
+                        'Kristen' => 'Kristen',
+                        'Katolik' => 'Katolik',
+                        'Hindu'   => 'Hindu',
+                        'Buddha'  => 'Buddha',
+                    ])
+                    ->placeholder('Semua Agama'),
                 TernaryFilter::make('is_active')
                 ->label('Status Siswa')
                 ->placeholder('Semua Status')
