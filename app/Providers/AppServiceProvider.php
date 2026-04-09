@@ -8,6 +8,9 @@ use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate; // 1. Tambahkan ini
+use Spatie\Activitylog\Models\Activity; // 2. Tambahkan ini
+use App\Policies\ActivityPolicy; // 3. Tambahkan ini
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Activity::class, ActivityPolicy::class);
         Scramble::configure()
         ->withDocumentTransformers(function (OpenApi $openApi) {
             $openApi->secure(
