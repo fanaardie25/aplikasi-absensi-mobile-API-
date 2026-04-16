@@ -94,22 +94,24 @@ class TeachersTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    BulkAction::make('assignTeacherToClass')
-                    ->label('Assign ke Kelas')
-                    ->icon('heroicon-o-user-group')
-                    ->schema([
-                        Select::make('class_id')
-                            ->label('Pilih Kelas')
-                            ->options(SchoolClass::whereNull('teacher_id')->pluck('name', 'id'))
-                            ->multiple()
-                            ->required(),
-                    ])
-                    ->action(function (Collection $records, array $data) { 
-                        $records->each(function ($teacher) use ($data) {
-                            SchoolClass::whereIn('id', $data['class_id'])
-                                ->update(['teacher_id' => $teacher->id]);
-                        });
-                    })
+                    // BulkAction::make('assignTeacherToClass')
+                    // ->label('Assign ke Kelas')
+                    // ->icon('heroicon-o-user-group')
+                    // ->schema([
+                    //     Select::make('class_id')
+                    //         ->label('Pilih Kelas')
+                    //         ->options(SchoolClass::whereNull('teacher_id')->whereHas('academicYear', function ($query) {
+                    //                     $query->where('is_active', true);
+                    //                 })->pluck('name', 'id'))
+                    //         ->multiple()
+                    //         ->required(),
+                    // ])
+                    // ->action(function (Collection $records, array $data) { 
+                    //     $records->each(function ($teacher) use ($data) {
+                    //         SchoolClass::whereIn('id', $data['class_id'])
+                    //             ->update(['teacher_id' => $teacher->id]);
+                    //     });
+                    // })
                 ]),
                 ForceDeleteBulkAction::make(),
                 RestoreBulkAction::make(),

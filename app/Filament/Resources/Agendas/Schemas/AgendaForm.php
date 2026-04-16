@@ -36,13 +36,13 @@ return $schema
                                     'ibadah' => 'Ibadah',
                                     'kebersihan' => 'Kebersihan',
                                 ])
-                                ->live() // Bikin form reaktif pas kategori dipilih
+                                ->live() 
                                 ->required(),
 
                             Select::make('teacher_id')
                                 ->label('Guru Pengawas/Imam (Opsional)')
                                 ->options(function () {
-                                    return User::where('role', 'teacher')->pluck('name', 'id');
+                                    return User::where('role', 'teacher')->where('is_active', true)->pluck('name', 'id');
                                 })
                                 ->searchable()
                                 ->nullable(),

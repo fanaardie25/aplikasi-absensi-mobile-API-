@@ -31,7 +31,8 @@ class SchedulesTable
                 TextColumn::make('classes.name')
                     ->label('Kelas')
                     ->badge()
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn ($record) => $record->classes->first()?->academicYear->year ?? '-'),
 
                 TextColumn::make('agenda.teacher.name')
                     ->label('Imam / Pengawas')

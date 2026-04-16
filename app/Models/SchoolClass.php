@@ -34,6 +34,11 @@ class SchoolClass extends Model
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'class_id');
+    }
+
     public function teacher(){
         return $this->belongsTo(User::class,'teacher_id');
     }

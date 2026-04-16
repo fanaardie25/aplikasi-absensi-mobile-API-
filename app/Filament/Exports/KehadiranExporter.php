@@ -52,6 +52,9 @@ class KehadiranExporter extends Exporter
             ExportColumn::make('student.schoolClass.name')
                 ->label('Kelas'),
 
+            ExportColumn::make('student.schoolClass.AcademicYear.year')
+                ->label('Tahun Ajaran'),
+
             ExportColumn::make('created_at')
                 ->label('Tanggal Absen')
                 ->formatStateUsing(fn ($state) => $state->format('d/m/Y')),

@@ -37,7 +37,7 @@ class AttendanceResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-                        ->with('class','student','scheduleClass.fridaySchedule.agenda');
+                        ->with('class','student','scheduleClass.fridaySchedule.agenda','class.academicYear');
     }
 
     public static function table(Table $table): Table

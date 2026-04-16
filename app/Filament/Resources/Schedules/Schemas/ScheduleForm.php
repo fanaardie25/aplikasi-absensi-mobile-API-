@@ -39,7 +39,12 @@ class ScheduleForm
                 Select::make('classes')
                     ->label('Pilih Kelas')
                     ->multiple() 
-                    ->relationship('classes', 'name')
+                    ->relationship('classes', 'name', function ($query) {
+                        $query->where('is_active', true)
+                            ->whereHas('academicYear', function ($q) {
+                                $q->where('is_active', true);
+                            });
+                    })
                     ->preload() 
                     ->searchable()
                     ->required(),
