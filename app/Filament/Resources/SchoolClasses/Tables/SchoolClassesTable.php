@@ -17,6 +17,8 @@ use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -54,7 +56,12 @@ class SchoolClassesTable
                     
             ])
             ->filters([
-                //
+                Filter::make('active')
+                    ->label('Kelas Aktif')
+                    ->query(fn ($query) => $query->where('is_active', true)),
+                SelectFilter::make('academic_year_id')
+                    ->label('Tahun Ajaran')
+                    ->options(AcademicYear::pluck('year', 'id')),
             ])
             ->recordActions([
                 EditAction::make(),
