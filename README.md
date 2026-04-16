@@ -1,59 +1,265 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📋 Aplikasi Absensi Mobile — Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem backend untuk **aplikasi absensi mobile** berbasis lokasi (geofencing) yang dirancang untuk lingkungan sekolah. Dibangun menggunakan **Laravel 12**, **Filament 5**, dan **Laravel Sanctum 4**.
 
-## About Laravel
+## ✨ Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 📱 Mobile App (REST API)
+- **Login** via NIS atau Email dengan token-based authentication (Sanctum)
+- **Absensi** dengan foto selfie + validasi GPS (geofencing)
+- **Pembatasan waktu absensi** otomatis berdasarkan jadwal agenda
+- **Pembatasan kelas** — siswa hanya bisa absen di jadwal kelasnya
+- **Pencegahan absen ganda** per hari per jadwal
+- **Filter agenda** berdasarkan jenis kelamin dan agama
+- **Riwayat kehadiran** (terkini & lengkap)
+- **Update foto profil** dengan kompresi otomatis ke WebP
+- **Force change password** untuk siswa baru hasil import
+- **Statistik kehadiran** (hadir & tidak hadir)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🖥️ Admin Panel (`/admin`)
+- **Dashboard** — Statistik total guru, siswa, dan kelas aktif
+- **Data Siswa** — CRUD + Import CSV + Bulk Action (Luluskan, Floating, Pindah Kelas)
+- **Data Guru** — CRUD + Import CSV + View detail kelas bimbingan
+- **Data Kelas** — Auto-generate nama kelas + Salin formasi kelas antar tahun ajaran
+- **Agenda** — Template kegiatan dengan pengaturan waktu absen & target peserta (gender/agama)
+- **Jadwal** — Buat jadwal per tanggal + Push Notification (FCM) ke siswa
+- **Kehadiran** — Monitoring real-time + Edit status langsung + Export Excel (XLSX)
+- **Tahun Ajaran** — Manajemen tahun ajaran (hanya 1 aktif)
+- **Pengaturan** — Konfigurasi geofencing (koordinat & radius) + branding aplikasi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👨‍🏫 Teacher Panel (`/teacher`)
+- **Dashboard** — Statistik kelas yang diampu
+- **Kehadiran** — Monitoring kehadiran siswa di kelas bimbingan
+- **Kelas** — Lihat data kelas yang diampu
 
-## Learning Laravel
+## 🛠️ Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+| Komponen | Teknologi |
+|----------|-----------|
+| Framework | Laravel 12 |
+| Admin Panel | Filament 5 |
+| Authentication | Laravel Sanctum 4 |
+| Database | MySQL |
+| Image Processing | Intervention Image |
+| Push Notification | Firebase Cloud Messaging (FCM) v1 |
+| API Documentation | Scramble (OpenAPI) |
+| Export | Filament Export (XLSX) |
+| PDF | DomPDF (opsional) |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 📦 Instalasi & Setup
 
-## Laravel Sponsors
+### Prasyarat
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- MySQL
+- (Opsional) Firebase project untuk push notification
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Langkah Instalasi
 
-### Premium Partners
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd absensi-app-api
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 2. Install dependencies
+composer install
+npm install
 
-## Contributing
+# 3. Setup environment
+cp .env.example .env
+php artisan key:generate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 4. Konfigurasi database di file .env
+# DB_DATABASE=siasata_app_api
+# DB_USERNAME=root
+# DB_PASSWORD=
 
-## Code of Conduct
+# 5. Jalankan migrasi
+php artisan migrate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 6. Buat symbolic link untuk storage
+php artisan storage:link
 
-## Security Vulnerabilities
+# 7. Build assets
+npm run build
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 8. Jalankan server
+composer dev
+# Atau manual:
+php artisan serve
+```
 
-## License
+### Setup Firebase (Opsional — untuk Push Notification)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. Buat project di [Firebase Console](https://console.firebase.google.com)
+2. Download file `firebase_credential.json` dari Project Settings → Service Accounts
+3. Simpan file di `storage/app/firebase_credential.json`
+
+## 🔑 API Endpoints
+
+### Authentication
+
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/auth/login` | Login via NIS/Email | ❌ |
+| `POST` | `/api/auth/logout` | Logout (revoke token) | ✅ |
+| `POST` | `/api/auth/change-password` | Ganti password & email | ✅ |
+
+### User
+
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/api/me` | Data profil + jadwal hari ini + statistik | ✅ |
+| `GET` | `/api/user/activity/latest` | 5 riwayat absensi terkini | ✅ |
+| `GET` | `/api/user/activity/all` | Seluruh riwayat absensi | ✅ |
+| `POST` | `/api/user/update/profile` | Update foto profil | ✅ |
+
+### Attendance
+
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/api/attendance` | Submit absensi (foto + GPS) | ✅ |
+
+### Contoh Request Login
+
+```json
+POST /api/auth/login
+{
+    "login": "P.12345",
+    "password": "password123"
+}
+```
+
+### Contoh Request Absensi
+
+```
+POST /api/attendance
+Content-Type: multipart/form-data
+
+schedule_id: 1
+latitude: "-7.390022"
+longtitude: "110.518086"
+photo: [file]
+```
+
+### Dokumentasi API Lengkap
+
+Setelah server berjalan, akses dokumentasi API otomatis di:
+```
+http://localhost:8000/docs/api
+```
+
+## 👤 Role & Akses
+
+| Role | Akses |
+|------|-------|
+| `admin` | Admin Panel (`/admin`) — Full akses semua fitur |
+| `teacher` | Teacher Panel (`/teacher`) — View kehadiran & kelas bimbingan |
+| `student` | Mobile App (REST API) — Absensi & profil |
+
+## 📖 Panduan Admin
+
+### 🆕 Setup Pertama Kali
+
+Lakukan langkah-langkah berikut **secara berurutan**:
+
+1. **Pengaturan** (`/admin/manage-settings`)
+   - Set koordinat sekolah (Latitude & Longitude)
+   - Set radius absen (dalam meter)
+   - Set nama aplikasi, URL, dan favicon
+
+2. **Tahun Ajaran** (`/admin/academic-years`)
+   - Buat tahun ajaran (contoh: `2025/2026`)
+   - Aktifkan dengan toggle
+
+3. **Data Guru** (`/admin/teachers`)
+   - Unduh template CSV → isi data → Import
+   - Atau tambah manual satu per satu
+   - Password default guru: `guru123!`
+
+4. **Data Kelas** (`/admin/school-classes`)
+   - Buat kelas (contoh: grade=10, jurusan=RPL, urutan=1 → `10 RPL 1`)
+   - Assign guru pembimbing
+   - Pilih tahun ajaran aktif
+
+5. **Data Siswa** (`/admin/users`)
+   - Unduh template CSV → isi data → Import
+   - Atau tambah manual satu per satu
+   - Assign setiap siswa ke kelasnya
+   - Password default siswa: NIS masing-masing
+   - Siswa baru wajib ganti password saat login pertama
+
+6. **Agenda** (`/admin/agendas`)
+   - Buat template kegiatan (contoh: `Sholat Dzuhur`)
+   - Atur jam mulai & batas akhir absensi
+   - Set target peserta (semua/laki-laki/perempuan, semua agama/spesifik)
+
+7. **Jadwal** (`/admin/schedules`)
+   - Buat jadwal: pilih agenda + tanggal + kelas yang ikut
+   - Push notification otomatis terkirim ke siswa terkait
+
+### 🔄 Pergantian Tahun Ajaran
+
+1. **Buat Tahun Ajaran Baru** → Aktifkan (TA lama otomatis non-aktif)
+2. **Salin Kelas** → Klik "Salin Kelas" di halaman Kelas, pilih dari TA lama ke TA baru
+3. **Luluskan Kelas 12** → Select siswa kelas 12 → Bulk Action "Luluskan Siswa Terpilih"
+4. **Set Floating Kelas 10 & 11** → Bulk Action "Set Jadi Floating (Naik Kelas)"
+5. **Pindahkan ke Kelas Baru** → Filter "Siswa Belum Ada Kelas" → Bulk Action "Pindahkan ke Kelas"
+6. **Import Siswa Baru** (kelas 10) → Assign ke kelas di TA baru
+7. **Update Guru Pembimbing** jika ada perubahan
+
+## 📁 Struktur Project
+
+```
+absensi-app-api/
+├── app/
+│   ├── Filament/
+│   │   ├── Exports/          # Exporter (Kehadiran XLSX)
+│   │   ├── Imports/           # Importer (Siswa & Guru CSV)
+│   │   ├── Pages/             # Halaman Pengaturan
+│   │   ├── Resources/         # Resource Admin Panel
+│   │   │   ├── AcademicYears/ # Tahun Ajaran
+│   │   │   ├── Agendas/       # Agenda Kegiatan
+│   │   │   ├── Attendances/   # Data Kehadiran
+│   │   │   ├── Schedules/     # Jadwal
+│   │   │   ├── SchoolClasses/ # Data Kelas
+│   │   │   ├── Teachers/      # Data Guru
+│   │   │   └── Users/         # Data Siswa
+│   │   ├── Teacher/           # Resource Teacher Panel
+│   │   └── Widgets/           # Dashboard Widgets
+│   ├── Http/
+│   │   ├── Controllers/api/   # API Controllers
+│   │   └── Middleware/        # Custom Middleware
+│   ├── Models/                # Eloquent Models
+│   └── Providers/             # Service & Panel Providers
+├── database/
+│   └── migrations/            # Database Migrations
+├── routes/
+│   └── api.php                # API Routes
+└── storage/
+    └── app/
+        └── firebase_credential.json  # (manual, tidak di-commit)
+```
+
+## 🗃️ Entity Relationship
+
+```
+AcademicYear 1──N SchoolClass N──1 User (teacher)
+                      │
+                      N
+                      │
+              ScheduleClass (pivot)
+                 │         │
+                 N         N
+                 │         │
+          FridaySchedule   Attendance──N──1 User (student)
+                 │
+                 N──1
+                 │
+               Agenda──N──1 User (teacher/imam)
+```
+
+## 📄 Lisensi
+
+Project ini dikembangkan untuk keperluan internal sekolah.
