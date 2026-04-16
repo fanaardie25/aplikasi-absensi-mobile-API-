@@ -54,6 +54,11 @@ class TeacherForm
                                 ])
                                 ->default('Islam') 
                                 ->required(),
+                            Toggle::make('is_active')
+                                ->label('Status Aktif')
+                                ->onColor('success')
+                                ->offColor('danger')
+                                ->default(true),
                         ]),
                     ]),
 
