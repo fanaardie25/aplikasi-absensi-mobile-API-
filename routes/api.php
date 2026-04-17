@@ -21,6 +21,12 @@ Route::get('/me', function (Request $request) {
         'attendances as alpa_count' => function ($query) {
             $query->where('status', 'tidak_hadir');
         },
+        'attendances as izin_count' => function ($query) {
+            $query->where('status', 'izin');
+        },
+        'attendances as sakit_count' => function ($query) {
+            $query->where('status', 'sakit');
+        },
     ]);
     
     $todayDate = now()->format('Y-m-d');
@@ -96,7 +102,9 @@ Route::get('/me', function (Request $request) {
         'is_absent_today'    => !is_null($attendanceToday),
         'stats' => [
             'hadir'       => $user->hadir_count,
-            'tidak_hadir' => $user->alpa_count
+            'tidak_hadir' => $user->alpa_count,
+            'izin'        => $user->izin_count,
+            'sakit'       => $user->sakit_count,
         ]
     ]);
 })->middleware('auth:sanctum');
