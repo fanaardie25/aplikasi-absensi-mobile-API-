@@ -71,7 +71,8 @@ class AttendancesTable
             TextColumn::make('class.name')
                 ->label('Kelas')
                 ->badge()
-                ->color('gray'),
+                ->color('gray')
+                ->description(fn ($record) => $record->class->academicYear->year ?? '-'),
 
             TextColumn::make('created_at')
                 ->label('Waktu Absen')
@@ -105,6 +106,13 @@ class AttendancesTable
                     'izin' => 'izin',
                     'sakit' => 'sakit'
                 ]),
+                // --- FILTER TAHUN AJARAN ---
+                SelectFilter::make('Tahun Ajaran')
+                    ->label('Filter Tahun Ajaran')
+                    ->relationship('class.academicYear', 'year') 
+                    ->searchable()
+                    ->preload(),
+                // ------------------------------------
                 SelectFilter::make('Agenda')
                     ->label('Filter Kegiatan')
                     ->relationship('scheduleClass.fridaySchedule.agenda', 'name')

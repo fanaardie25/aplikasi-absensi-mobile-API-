@@ -32,7 +32,7 @@ class AttendanceResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-        ->with('class','student','scheduleClass.fridaySchedule.agenda')
+        ->with('class','student','scheduleClass.fridaySchedule.agenda','class.academicYear')
         ->whereHas('class', function ($query) {
             $query->where('teacher_id', Auth::id());
         });

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Teacher\Resources\SchoolClasses\Tables;
 
+use App\Models\SchoolClass;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,6 +26,11 @@ class SchoolClassesTable
                     ->searchable(),
                 TextColumn::make('academicYear.year')
                     ->label('Tahun Ajaran'),
+                TextColumn::make('total_students')
+                    ->label('Jumlah Siswa')
+                    ->getStateUsing(function (SchoolClass $record) {
+                        return $record->students()->count();
+                }),
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->icon(fn (bool $state): Heroicon => match ($state) {
