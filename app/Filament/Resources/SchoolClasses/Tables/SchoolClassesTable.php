@@ -28,9 +28,6 @@ class SchoolClassesTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable()
-                    ->searchable(),
                 TextColumn::make('name')
                     ->label('Kelas')
                     ->searchable(),
@@ -59,6 +56,9 @@ class SchoolClassesTable
                 Filter::make('active')
                     ->label('Kelas Aktif')
                     ->query(fn ($query) => $query->where('is_active', true)),
+                Filter::make('non_active')
+                    ->label('Kelas Tidak Aktif')
+                    ->query(fn ($query) => $query->where('is_active', false)),
                 SelectFilter::make('academic_year_id')
                     ->label('Tahun Ajaran')
                     ->options(AcademicYear::pluck('year', 'id')),
