@@ -9,6 +9,7 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 class GuruImporter extends Importer
 {
@@ -25,7 +26,7 @@ class GuruImporter extends Importer
             ImportColumn::make('email')
                 ->label('Email')
                 ->requiredMapping()
-                ->rules(['required', 'email', 'max:255']),
+                ->rules(['nullable', 'email', 'max:255']),
 
             ImportColumn::make('nip')
                 ->label('NIP')
@@ -57,6 +58,10 @@ class GuruImporter extends Importer
     {
         $this->record->role = 'teacher';
         $this->record->is_active = true;
+
+        if (blank($this->record->email)) {
+            $this->record->email = Str::slug($this->data['name']) . '-' . rand(100, 999) . '@satamail.my.id';
+        }
 
         if (! $this->record->exists) {
             $this->record->password = Hash::make('guru123!');

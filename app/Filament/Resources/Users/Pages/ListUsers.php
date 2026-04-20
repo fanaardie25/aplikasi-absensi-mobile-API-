@@ -9,6 +9,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\HtmlString;
 
 class ListUsers extends ListRecords
 {
@@ -36,6 +37,11 @@ class ListUsers extends ListRecords
                 ->importer(SiswaImporter::class)
                 ->color('info')
                 ->icon('heroicon-o-user-group')
+                ->modalDescription(new HtmlString('
+                        Upload file CSV/Excel data guru sesuai template. <br><br>
+                        <span style="color: #F39C12; font-weight: bold;">💡 INFO PENTING:</span><br> 
+                        Jika kolom email di Excel dibiarkan kosong, sistem akan otomatis <b>meng-generate email acak</b> untuk siswa tersebut.
+                    '))
                 ->after(function () {
                     return redirect(request()->header('Referer'));
                 }),

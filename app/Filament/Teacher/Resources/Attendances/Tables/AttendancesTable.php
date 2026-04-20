@@ -3,11 +3,7 @@
 namespace App\Filament\Teacher\Resources\Attendances\Tables;
 
 use App\Filament\Exports\KehadiranExporter;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
