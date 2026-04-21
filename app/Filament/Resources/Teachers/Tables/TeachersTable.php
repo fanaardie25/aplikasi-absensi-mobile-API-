@@ -69,7 +69,7 @@ class TeachersTable
             ])
             ->filters([
                 Filter::make('guru_floating')
-                        ->label('Floating kelas')
+                        ->label('Hanya Guru Tanpa Kelas')
                         ->query(fn (Builder $query) => $query->whereDoesntHave('supervisedClasses'))
                         ->indicator('Guru Tanpa Kelas Bimbingan')
                         ->toggle(),

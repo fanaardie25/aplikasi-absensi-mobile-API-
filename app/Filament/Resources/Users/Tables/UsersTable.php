@@ -81,7 +81,7 @@ class UsersTable
             ])
             ->filters([
                 Filter::make('is_floating')
-                ->label('Siswa Belum Ada Kelas')
+                ->label('Hanya Siswa Tanpa Kelas')
                 ->query(fn (EloquentBuilder $query) => $query->whereNull('class_id'))
                 ->toggle(),
     

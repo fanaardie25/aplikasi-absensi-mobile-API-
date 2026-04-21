@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class AgendasTable
@@ -16,12 +17,12 @@ class AgendasTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Nama Agenda'),
+                TextColumn::make('name')->label('Nama Agenda')->searchable(),
                 TextColumn::make('start_absensi')->label('Jam Mulai Absensi')
                     ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i')),
                 TextColumn::make('end_absensi')->label('Jam Batas Akhir Absensi')
                     ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->format('H:i')),
-                TextColumn::make('teacher.name')->label('Guru Pengawas/Imam'),
+                TextColumn::make('teacher.name')->label('Guru Pengawas/Imam')->searchable(),
                 TextColumn::make('category')
                     ->label('Kategori')
                     ->badge()
@@ -43,7 +44,12 @@ class AgendasTable
                     ->falseColor('danger'), 
             ])
             ->filters([
-                //
+                SelectFilter::make('category')
+                    ->label('Filter Kategori')
+                    ->options([
+                        'ibadah' => 'Ibadah',
+                        'kebersihan' => 'Kebersihan',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),
