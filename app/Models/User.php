@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -91,5 +92,17 @@ class User extends Authenticatable implements FilamentUser
     public function supervisedClasses()
     {
         return $this->hasMany(SchoolClass::class, 'teacher_id');
+    }
+
+    protected function nis(): Attribute
+    {
+        return Attribute::make(
+            set: function (?string $value) {
+                if (!$value) return null;
+                
+                $clean = preg_replace('/\s+/', '', $value);
+                return strtoupper($clean);
+            }
+        );
     }
 }
