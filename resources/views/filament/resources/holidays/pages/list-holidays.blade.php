@@ -162,6 +162,7 @@
             margin-top: 1.25rem; border-radius: 1rem;
             border: 1px solid #e5e7eb; border-style: dashed;
             padding: 2.5rem 1.5rem; text-align: center; background: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .dark .cal-empty { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.08); }
         .cal-empty-icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.6; }
@@ -169,7 +170,91 @@
         .dark .cal-empty-title { color: #d1d5db; }
         .cal-empty-desc { font-size: 0.8rem; color: #9ca3af; margin: 0; }
         .dark .cal-empty-desc { color: #6b7280; }
+        /* ===== Custom Confirm Modal ===== */
+        .confirm-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            animation: confirmFadeIn 0.15s ease-out;
+        }
+        @keyframes confirmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes confirmSlideIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .confirm-box {
+            background: white; border-radius: 1rem; padding: 1.5rem;
+            width: 100%; max-width: 26rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: confirmSlideIn 0.2s ease-out;
+        }
+        .dark .confirm-box { background: #1f2937; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .confirm-icon-wrap {
+            width: 3rem; height: 3rem; border-radius: 9999px;
+            background: var(--cal-danger-light); border: 1px solid var(--cal-danger-border);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.85rem;
+        }
+        .confirm-icon-wrap svg { color: var(--cal-danger); width: 1.4rem; height: 1.4rem; }
+        .confirm-title { font-size: 1rem; font-weight: 700; color: #111827; text-align: center; margin-bottom: 0.35rem; }
+        .dark .confirm-title { color: #f3f4f6; }
+        .confirm-msg { font-size: 0.85rem; color: #6b7280; text-align: center; margin-bottom: 1.25rem; line-height: 1.5; }
+        .dark .confirm-msg { color: #9ca3af; }
+        .confirm-actions { display: flex; gap: 0.6rem; justify-content: center; }
+        .confirm-btn { padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; }
+        .confirm-btn--cancel { background: #f3f4f6; color: #374151; }
+        .confirm-btn--cancel:hover { background: #e5e7eb; }
+        .dark .confirm-btn--cancel { background: rgba(255,255,255,0.08); color: #d1d5db; }
+        .dark .confirm-btn--cancel:hover { background: rgba(255,255,255,0.12); }
+        .confirm-btn--danger { background: var(--cal-danger); color: white; }
+        .confirm-btn--danger:hover { background: #dc2626; transform: scale(1.02); }
     </style>
+
+    {{-- ═══════ Custom Confirmation Modal (Alpine.js) ═══════ --}}
+    <div
+        x-data="{
+            show: false,
+            title: '',
+            message: '',
+            action: null,
+            open(title, message, action) {
+                this.title = title;
+                this.message = message;
+                this.action = action;
+                this.show = true;
+            },
+            confirm() {
+                if (this.action) this.action();
+                this.close();
+            },
+            close() {
+                this.show = false;
+                this.title = '';
+                this.message = '';
+                this.action = null;
+            }
+        }"
+        x-on:confirm-delete.window="open(
+            $event.detail.title ?? 'Hapus Data',
+            $event.detail.message ?? 'Yakin ingin menghapus?',
+            $event.detail.action
+        )"
+        x-cloak
+    >
+        <template x-if="show">
+            <div class="confirm-overlay" x-on:click.self="close()" x-on:keydown.escape.window="close()">
+                <div class="confirm-box">
+                    <div class="confirm-icon-wrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <h3 class="confirm-title" x-text="title"></h3>
+                    <p class="confirm-msg" x-text="message"></p>
+                    <div class="confirm-actions">
+                        <button type="button" class="confirm-btn confirm-btn--cancel" x-on:click="close()">Batal</button>
+                        <button type="button" class="confirm-btn confirm-btn--danger" x-on:click="confirm()">Ya, Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
 
     <div>
         {{-- Navigation --}}
@@ -221,7 +306,6 @@
         @if ($list->isNotEmpty())
             <div class="hlist">
                 <div class="hlist-header">
-                    <span style="font-size:1rem"></span>
                     <h3 class="hlist-title">Daftar Hari Libur — {{ $this->monthName }}</h3>
                     <span class="hlist-count">{{ $list->count() }} hari</span>
                 </div>
@@ -242,7 +326,7 @@
             </div>
         @else
             <div class="cal-empty">
-                <div class="cal-empty-icon">📅</div>
+                <div class="cal-empty-icon"><x-heroicon-s-calendar-days style="width: 3rem; height: 3rem; " /></div>
                 <p class="cal-empty-title">Tidak ada hari libur</p>
                 <p class="cal-empty-desc">Belum ada hari libur yang terdaftar untuk bulan {{ $this->monthName }}.</p>
             </div>

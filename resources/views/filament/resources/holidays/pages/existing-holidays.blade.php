@@ -47,8 +47,12 @@
                     </div>
                     <button
                         type="button"
-                        wire:click="deleteHoliday({{ $holiday->id }})"
-                        wire:confirm="Yakin ingin menghapus '{{ $holiday->name }}'?"
+                        x-data
+                        x-on:click="$dispatch('confirm-delete', {
+                            title: 'Hapus Hari Libur',
+                            message: 'Yakin ingin menghapus \'{{ $holiday->name }}\'?',
+                            action: () => $wire.deleteHoliday({{ $holiday->id }})
+                        })"
                         class="eh-del-btn">
                         <x-heroicon-o-trash style="width: 0.85rem; height: 0.85rem;" />
                         Hapus

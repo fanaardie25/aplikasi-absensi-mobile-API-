@@ -57,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()
             ->globalSearch(false)
             ->favicon(fn () => asset('storage/' . Setting::get('site_favicon')));

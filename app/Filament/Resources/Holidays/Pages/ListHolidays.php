@@ -75,7 +75,7 @@ class ListHolidays extends Page
                         'description' => $data['description'] ?? null,
                     ]);
 
-                    unset($this->calendarData, $this->holidaysList);
+                    unset($this->monthlyHolidays, $this->calendarData, $this->holidaysList);
 
                     Notification::make()
                         ->title('Berhasil')
@@ -111,7 +111,7 @@ class ListHolidays extends Page
         $date = Carbon::create($this->currentYear, $this->currentMonth, 1)->subMonth();
         $this->currentMonth = $date->month;
         $this->currentYear = $date->year;
-        unset($this->calendarData, $this->holidaysList);
+        unset($this->monthlyHolidays, $this->calendarData, $this->holidaysList);
     }
 
     public function nextMonth(): void
@@ -119,14 +119,14 @@ class ListHolidays extends Page
         $date = Carbon::create($this->currentYear, $this->currentMonth, 1)->addMonth();
         $this->currentMonth = $date->month;
         $this->currentYear = $date->year;
-        unset($this->calendarData, $this->holidaysList);
+        unset($this->monthlyHolidays, $this->calendarData, $this->holidaysList);
     }
 
     public function deleteHoliday(int $id): void
     {
         Holiday::findOrFail($id)->delete();
 
-        unset($this->calendarData, $this->holidaysList);
+        unset($this->monthlyHolidays, $this->calendarData, $this->holidaysList);
 
         Notification::make()
             ->title('Berhasil')
@@ -135,13 +135,29 @@ class ListHolidays extends Page
             ->send();
     }
 
+    // ─── Computed (Single Source of Truth) ─────────────────────────
+
+    /**
+     * Single cached query — semua computed lain derive dari sini.
+     * Hanya 1x query Holiday per render.
+     */
+    #[Computed]
+    public function monthlyHolidays(): Collection
+    {
+        return Holiday::whereYear('date', $this->currentYear)
+            ->whereMonth('date', $this->currentMonth)
+            ->orderBy('date')
+            ->get();
+    }
+
+    /**
+     * Calendar grid — derived dari monthlyHolidays.
+     * TIDAK menjalankan query sendiri.
+     */
     #[Computed]
     public function calendarData(): array
     {
-        $holidays = Holiday::whereYear('date', $this->currentYear)
-            ->whereMonth('date', $this->currentMonth)
-            ->orderBy('date')
-            ->get()
+        $holidays = $this->monthlyHolidays
             ->groupBy(fn ($h) => Carbon::parse($h->date)->format('Y-m-d'));
 
         $startOfMonth = Carbon::create($this->currentYear, $this->currentMonth, 1);
@@ -189,12 +205,13 @@ class ListHolidays extends Page
         return $months[$this->currentMonth] . ' ' . $this->currentYear;
     }
 
+    /**
+     * List view — derived dari monthlyHolidays.
+     * TIDAK menjalankan query sendiri.
+     */
     #[Computed]
     public function holidaysList(): Collection
     {
-        return Holiday::whereYear('date', $this->currentYear)
-            ->whereMonth('date', $this->currentMonth)
-            ->orderBy('date')
-            ->get();
+        return $this->monthlyHolidays;
     }
 }
